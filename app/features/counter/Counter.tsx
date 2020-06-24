@@ -10,6 +10,7 @@ import {
   incrementAsync,
   selectCount,
 } from './counterSlice';
+import { Button as MButton} from '@material-ui/core'
 
 export default function Counter() {
   const dispatch = useDispatch();
@@ -63,8 +64,9 @@ export default function Counter() {
           data-tclass="btn"
           type="button"
         >
-          async
+          asyncz
         </button>
+        <MButton color='primary' >test</MButton>
       </div>
     </div>
   );

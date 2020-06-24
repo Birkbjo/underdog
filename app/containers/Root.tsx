@@ -5,17 +5,26 @@ import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 import { Store } from '../store';
 import Routes from '../Routes';
+import { createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
 
 type Props = {
   store: Store;
   history: History;
 };
 
+const darkTheme = createMuiTheme({
+  palette: {
+    type: 'dark',
+  },
+});
+
 const Root = ({ store, history }: Props) => (
   <Provider store={store}>
+    <ThemeProvider theme={darkTheme}>
     <ConnectedRouter history={history}>
       <Routes />
     </ConnectedRouter>
+    </ThemeProvider>
   </Provider>
 );
 
