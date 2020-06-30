@@ -5,18 +5,14 @@ import routes from '../constants/routes.json';
 import styles from './Home.css';
 import SelectWoWDir from '../features/config/SelectWowDir';
 import { selectPath } from '../features/config/configSlice';
-
+import removeCurseSrc from '../assets/removecurse.jpg';
+import AddonsView from '../features/AddonsView/AddonsView';
 export default function Home(): JSX.Element {
   const path = useSelector(selectPath);
 
-  return !path ? (
-    <SelectWoWDir />
-  ) : (
+  return (
     <div className={styles.container} data-tid="container">
-      <h2>Home</h2>
-      <Link to={routes.COUNTER}>to Counters</Link>
-      <br />
-      <Link to={routes.ADDONS}>to Addons</Link>
+      <AddonsView />
       <SelectWoWDir />
     </div>
   );

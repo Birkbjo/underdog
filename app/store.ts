@@ -7,6 +7,7 @@ import { ThunkAction } from 'redux-thunk';
 import createRootReducer from './rootReducer';
 
 export const history = createHashHistory();
+
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
@@ -43,5 +44,8 @@ export const configuredStore = (initialState?: RootState) => {
   }
   return store;
 };
+
+export const store = configuredStore();
+
 export type Store = ReturnType<typeof configuredStore>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;

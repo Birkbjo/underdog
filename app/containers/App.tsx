@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import Headerbar from '../components/Headerbar';
 
 type Props = {
   children: ReactNode;
@@ -6,5 +7,11 @@ type Props = {
 
 export default function App(props: Props) {
   const { children } = props;
-  return <>{children}</>;
+
+  return (
+    <>
+      <Headerbar />
+      {children}
+    </>
+  );
 }

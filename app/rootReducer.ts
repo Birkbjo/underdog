@@ -4,10 +4,13 @@ import { History } from 'history';
 // eslint-disable-next-line import/no-cycle
 import counterReducer from './features/counter/counterSlice';
 import configReducer from './features/config/configSlice';
+import addonsReducer from './features/AddonsView/addonsSlice'
+
 export default function createRootReducer(history: History) {
   return combineReducers({
     router: connectRouter(history),
     counter: counterReducer,
     config: configReducer,
+    addons: addonsReducer,
   });
 }

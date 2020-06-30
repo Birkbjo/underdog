@@ -3,9 +3,9 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Store } from '../store';
 import Routes from '../Routes';
-import { createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
 
 type Props = {
   store: Store;
@@ -21,9 +21,9 @@ const darkTheme = createMuiTheme({
 const Root = ({ store, history }: Props) => (
   <Provider store={store}>
     <ThemeProvider theme={darkTheme}>
-    <ConnectedRouter history={history}>
-      <Routes />
-    </ConnectedRouter>
+      <ConnectedRouter history={history}>
+        <Routes />
+      </ConnectedRouter>
     </ThemeProvider>
   </Provider>
 );

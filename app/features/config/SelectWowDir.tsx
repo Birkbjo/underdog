@@ -1,9 +1,12 @@
 import React, { useCallback, useState, SyntheticEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Snackbar } from '@material-ui/core';
+import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
 import { setPath, selectPath } from './configSlice';
+import AddonManager from '../AddonsView/AddonManager/AddonManager';
+import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
+import { getInstalledAddonInfo } from '../AddonsView/effects';
 
 function getDefaultPath() {
   const os = process.platform;
@@ -20,6 +23,7 @@ export default function SelectWoWDir() {
   const dispatch = useDispatch();
   const path = useSelector(selectPath);
   const [open, setOpen] = useState(!path);
+  const [scanning, setScanning] = useState(false);
 
   const handleSetPath = useCallback(() => {
     const promise = remote.dialog
@@ -30,8 +34,21 @@ export default function SelectWoWDir() {
       })
       .then((res) => {
         if (!res.canceled && res.filePaths) {
-          console.log(res.filePaths);
-          dispatch(setPath({ path: res.filePaths[0] }));
+          const filePath = res.filePaths[0];
+          dispatch(setPath({ path: filePath }));
+          setOpen(false);
+          setScanning(true);
+          new AddonManager(filePath)
+            .scan()
+            .then((addons) => {
+              console.log('ADDONS IS', addons);
+              setScanning(false);
+              dispatch(setAddons(addons));
+              addons.map((a) => dispatch(getInstalledAddonInfo(a)));
+              //dispatch(getInstalledAddonInfo(addons[0]));
+              return addons;
+            })
+            .catch((e) => console.log(err, e));
         }
         return res;
       })
