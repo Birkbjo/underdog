@@ -2,7 +2,7 @@
   "name": "electron-react-boilerplate",
   "productName": "Underdog Addon Manager",
   "version": "0.1.0",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
+  "description": "A WoW Addon Manager",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -89,7 +89,7 @@
         "rpm",
         "AppImage"
       ],
-      "category": "Development"
+      "category": "Games"
     },
     "directories": {
       "buildResources": "resources",
