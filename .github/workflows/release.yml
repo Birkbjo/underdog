@@ -1,6 +1,7 @@
-name: Test
+name: Release
 
-on: push
+on:
+  push: tags
 
 jobs:
   release:
@@ -23,7 +24,7 @@ jobs:
         run: |
           yarn install --frozen-lockfile
 
-      - name: yarn test
+      - name: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

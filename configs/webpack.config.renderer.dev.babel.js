@@ -256,7 +256,7 @@ export default merge.smart(baseConfig, {
       disableDotRule: false,
     },
     before() {
-      if (process.env.START_HOT) {
+      if (process.env.START_MAIN) {
         console.log('Starting Main Process...');
         spawn('npm', ['run', 'start-main-dev'], {
           shell: true,
