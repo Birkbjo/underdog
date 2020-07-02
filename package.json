@@ -103,7 +103,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/birkbjo/Underdog.git"
+    "url": "git+https://github.com/birkbjo/underdog.git"
   },
   "author": {
     "name": "Birk Johansson",
@@ -119,7 +119,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/birkbjo/Underdog/issues"
+    "url": "https://github.com/birkbjo/underdog/issues"
   },
   "keywords": [
     "electron",
@@ -133,7 +133,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/birkbjo/Underdog#readme",
+  "homepage": "https://github.com/birkbjo/underdog#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
