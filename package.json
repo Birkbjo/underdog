@@ -273,7 +273,6 @@
     "electron-store": "^5.2.0",
     "electron-updater": "^4.3.1",
     "folder-hash": "^3.3.2",
-    "got": "^11.3.0",
     "history": "4.7.2",
     "node-fetch": "^2.6.0",
     "react": "^16.13.1",
