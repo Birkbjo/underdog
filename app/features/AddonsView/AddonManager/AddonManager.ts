@@ -104,6 +104,7 @@ class AddonManager {
     const zipFileRes = await fetch(downloadUrl);
     const arrayBuffer = await zipFileRes.arrayBuffer();
     const buff = Buffer.from(arrayBuffer);
+
     const zipChecksum = crypto.createHash('md5').update(buff).digest('hex');
     console.log(
       'Installing',
@@ -140,6 +141,7 @@ class AddonManager {
 
     return {
       id: addonInfo.id,
+      name: addonInfo.name,
       addonInfo,
       installed: true,
       linked: false,
@@ -159,8 +161,6 @@ class AddonManager {
       releaseType: ReleaseType.Release,
     }
   ): Promise<InstalledAddon> {
-    console.log('in install');
-
     const sortedFiles = addon.latestFiles
       .filter(
         (f) =>
@@ -179,28 +179,6 @@ class AddonManager {
     }
 
     return this.installFile(addon, latestFile);
-    // .sort((a, b) => b.fileDate - a.fileDate);
-    console.log('sortedfiles', sortedFiles);
-    const zipUrl = sortedFiles[0].downloadUrl;
-    //const zipFileRes = got(zipUrl);
-    const zipFileRes = await fetch(zipUrl);
-    const arrayBuffer = await zipFileRes.arrayBuffer();
-    const buff = Buffer.from(arrayBuffer);
-    // const uint8Arr = new Uint8Array()
-    //const buff = Buffer.from(arrBuffer);
-
-    console.log('create checksum');
-    const checksum = crypto.createHash('md5').update(buff).digest('hex');
-    console.log('checksum created', checksum);
-    const timedZipper = this.timeIt(this.extractZip);
-    const timedAdm = this.timeIt(this.extractZipAdm);
-
-    await timedZipper(buff, this.installationPath);
-    await timedAdm(buff, this.installationPath);
-    //const zip = await this.extractZip(buff, this.installationPath);
-    //const zipadm = await this.extractZipAdm(buff, this.installationPath);
-
-    //   const;
   }
 }
 
@@ -214,7 +192,9 @@ export default AddonManager;
 
 let addonManagerFromState: AddonManager;
 export function getWithState(overridePath?: string): AddonManager {
+  console.log('in addonmanagerget');
   if (addonManagerFromState) {
+    console.log('return stored', addonManagerFromState);
     return addonManagerFromState;
   }
   const state = store.getState();

@@ -1,48 +1,73 @@
 import {
   createSlice,
   combineReducers,
-  createAsyncThunk,
+  createSelector,
+  createEntityAdapter,
+  EntityState,
 } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
+import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
+import { persistReducer } from 'redux-persist';
+import createElectronStorage from 'redux-persist-electron-storage';
+import storage from 'redux-persist/lib/storage/';
 import myAddonsReducer, {
   setAddons as setScannedAddons,
 } from './MyAddons/myAddonsSlice';
 import newAddonsReducer from './NewAddons/newAddonsSlice';
 import { ScannedAddonData, AddonSearchResult, InstalledAddon } from './types';
+import type { RootState } from '../../store';
 
-export interface InstalledAddonsSlice {
-  addons: InstalledAddon[];
-}
+const electronStore = createElectronStorage({
+  electronStoreOpts: {
+    name: 'installedAddons',
+  },
+});
+
+const installedAddonsAdapter = createEntityAdapter<InstalledAddon>({
+  selectId: (addon) => addon.id,
+  sortComparer: (a, b) => a.name.localeCompare(b.name),
+});
+
+export type InstalledAddonsState = EntityState<InstalledAddon>;
 const initialState: InstalledAddonsSlice = {
-  addons: [],
+  list: [],
 };
 
 const addonsSlice = createSlice({
   name: 'installed',
-  initialState,
+  initialState: installedAddonsAdapter.getInitialState(),
   reducers: {
-    addAddon: (state, action) => {
-      const addon = action.payload;
-      state.addons.push(addon);
-    },
+    addAddon: installedAddonsAdapter.addOne,
   },
   extraReducers: (builder) =>
     builder.addCase(setScannedAddons, (state, action) => {}),
 });
 
-// export const installAddon = createAsyncThunk(
-//   'addons/installAddon',
-//   async ({}, thunkAPI) => {}
-// );
-
-//export const installedAddons;
-
 export const { addAddon } = addonsSlice.actions;
 
-//export const getLinkedAddonBy;
+const {
+  selectAll,
+  selectTotal,
+  selectIds,
+  selectEntities,
+  selectById,
+} = installedAddonsAdapter.getSelectors(
+  (state: RootState) => state.addons.installed
+);
+
+export const selectAddons = (state: RootState) => selectAll(state);
+
+const persistedInstalledAddonsReducer = persistReducer<InstalledAddonsState>(
+  {
+    key: 'installed',
+    storage: electronStore,
+    stateReconciler: autoMergeLevel1,
+  },
+  addonsSlice.reducer
+);
 
 export default combineReducers({
   myAddons: myAddonsReducer,
   newAddons: newAddonsReducer,
-  addons: addonsSlice.reducer,
+  installed: persistedInstalledAddonsReducer,
 });

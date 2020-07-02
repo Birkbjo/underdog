@@ -7,13 +7,13 @@ class CurseForgeAPI {
   pageSize: number;
 
   constructor() {
-    this.baseURL = 'https://addons-ecs.forgesvc.net/api/v2/addon/';
+    this.baseURL = 'https://addons-ecs.forgesvc.net/api/v2/addon';
     this.pageSize = 20;
   }
 
   async search(addonName: string): Promise<AddonSearchResult[]> {
     const res = await fetch(
-      `${this.baseURL}search?gameId=1&pageSize=${this.pageSize}&searchFilter=${addonName}`,
+      `${this.baseURL}/search?gameId=1&pageSize=${this.pageSize}&searchFilter=${addonName}`,
       {
         cache: 'force-cache',
       }
@@ -25,10 +25,20 @@ class CurseForgeAPI {
 
   async getChangeLog(addonId: number, fileId: string): Promise<string> {
     const res = await fetch(
-      `${this.baseURL}${addonId}/file/${fileId}/changelog`
+      `${this.baseURL}/${addonId}/file/${fileId}/changelog`
     );
     const changeLogText = await res.text();
     return changeLogText;
+  }
+
+  async getPopularAddons(): Promise<AddonSearchResult[]> {
+    const res = await fetch(`${this.baseURL}/featured`, {
+      method: 'post',
+    });
+
+    const featuredAddons = await res.json();
+
+    return featuredAddons.popular as AddonSearchResult[];
   }
 }
 

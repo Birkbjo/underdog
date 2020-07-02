@@ -96,35 +96,30 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate",
+      "owner": "birkbjo",
+      "repo": "RemoveCurse",
       "private": false
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/birkbjo/RemoveCurse.git"
   },
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Birk Johansson",
+    "email": "birkbjo@gmail.com",
+    "url": "https://birk.dev"
   },
   "contributors": [
     {
-      "name": "Vikram Rangaraj",
-      "email": "vikr01@icloud.com",
-      "url": "https://github.com/vikr01"
-    },
-    {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
+      "name": "Birkbjo",
+      "email": "birkbjo@gmail.com",
+      "url": "https://github.com/birkbjo"
     }
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/birkbjo/RemoveCurse/issues"
   },
   "keywords": [
     "electron",
@@ -138,7 +133,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/birkbjo/RemoveCurse#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
@@ -275,6 +270,7 @@
     "connected-react-router": "^6.6.1",
     "electron-debug": "^3.1.0",
     "electron-log": "^4.2.2",
+    "electron-store": "^5.2.0",
     "electron-updater": "^4.3.1",
     "folder-hash": "^3.3.2",
     "got": "^11.3.0",
@@ -287,6 +283,8 @@
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.2.0",
     "redux": "^4.0.5",
+    "redux-persist": "^6.0.0",
+    "redux-persist-electron-storage": "^2.1.0",
     "redux-thunk": "^2.3.0",
     "source-map-support": "^0.5.19",
     "typeface-roboto": "^0.0.75"

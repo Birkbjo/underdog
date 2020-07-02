@@ -9,13 +9,21 @@ import { RootState } from './../../store';
 export const installAddon = createAsyncThunk(
   'addons/installAddon',
   async (id: number, thunkAPI) => {
+    console.log('install addon act');
     const state = thunkAPI.getState() as RootState;
+    console.log(state);
     const manager = getAddonManager();
+    console.log('manager is', manager);
     const searchResult = selectResult(state).find((sr) => sr.id === id);
+    console.log(searchResult);
     if (!searchResult) {
+      console.log('no search res');
       return thunkAPI.rejectWithValue('No searchresult with id ');
     }
-    manager.installLatestFile(searchResult);
+    const installed = await manager.installLatestFile(searchResult);
+    console.log('Installed addon', installed);
+    thunkAPI.dispatch(addAddon(installed));
+    return installed;
   }
 );
 
@@ -45,5 +53,12 @@ export const getInstalledAddonInfo = createAsyncThunk(
     }
   }
 );
+
+// export const scanAndGetAddonInfo = createAsyncThunk(
+//   'addons/scanAndGetAddonInfo',
+//   async (args, thunkAPI => {
+//     thunkAPI.dispatch()
+//   }
+// );
 
 //export const installedAddons;

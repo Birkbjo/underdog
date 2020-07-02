@@ -7,6 +7,7 @@ import { setPath, selectPath } from './configSlice';
 import AddonManager from '../AddonsView/AddonManager/AddonManager';
 import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
 import { getInstalledAddonInfo } from '../AddonsView/effects';
+import { persistor } from '../../store';
 
 function getDefaultPath() {
   const os = process.platform;
@@ -41,13 +42,11 @@ export default function SelectWoWDir() {
           new AddonManager(filePath)
             .scan()
             .then((addons) => {
-              console.log('ADDONS IS', addons);
               setScanning(false);
               dispatch(setAddons(addons));
-              addons.map((a) => dispatch(getInstalledAddonInfo(a)));
-              //dispatch(getInstalledAddonInfo(addons[0]));
               return addons;
             })
+            //.then(() => persistor.flush())
             .catch((e) => console.log(err, e));
         }
         return res;

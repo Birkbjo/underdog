@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AddonSearchResult } from '../types';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../../../store';
+import type { RootState } from '../../../store';
 
 export interface NewAddonsSlice {
   addons: AddonSearchResult[];

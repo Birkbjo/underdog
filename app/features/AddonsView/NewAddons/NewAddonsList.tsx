@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import {
+  Button,
   TableContainer,
   Table,
   TableHead,
@@ -12,6 +13,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { selectResult } from './newAddonsSlice';
+import { installAddon } from '../effects';
 import { AddonSearchResult } from '../types';
 
 type AddonsTableProps = {
@@ -48,6 +50,7 @@ function NewAddonsTable({ addons }: AddonsTableProps) {
           <TableRow>
             <TableCell />
             <TableCell>Name</TableCell>
+            <TableCell></TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Game Version</TableCell>
           </TableRow>
@@ -68,8 +71,13 @@ type AddonRowProps = {
 
 function AddonRow({ data }: AddonRowProps) {
   const { latestFiles } = data;
+  const dispatch = useDispatch();
   console.log(latestFiles);
   const thumb = data.attachments[0];
+
+  const handleInstall = async (id) => {
+    const installedAddon = await dispatch(installAddon(id));
+  };
   //const latestFile = latestFiles.sort((a, b) => b.fileDate - a.fileDate)[0];
   return (
     <TableRow key={data.name}>
@@ -81,6 +89,9 @@ function AddonRow({ data }: AddonRowProps) {
         )}
       </TableCell>
       <TableCell>{data.name}</TableCell>
+      <TableCell>
+        <Button onClick={() => handleInstall(data.id)}>Install</Button>
+      </TableCell>
       <TableCell>N/A</TableCell>
     </TableRow>
   );

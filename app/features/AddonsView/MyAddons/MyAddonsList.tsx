@@ -17,14 +17,10 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useAsync } from 'react-async-hook';
-import { selectAddons } from './myAddonsSlice';
+import { selectAddons as selectMyAddons } from './myAddonsSlice';
+import { selectAddons } from '../addonsSlice';
 import SelectWoWDir from '../../config/SelectWowDir';
-
-interface AddonData {
-  name: string;
-  title: string;
-  interface: string;
-}
+import { InstalledAddon } from '../types';
 
 export default function MyAddonsList() {
   const addons = useSelector(selectAddons);
@@ -42,7 +38,7 @@ export default function MyAddonsList() {
 }
 
 type AddonsTableProps = {
-  addons: AddonData[];
+  addons: InstalledAddon[];
 };
 
 function AddonsTable({ addons }: AddonsTableProps) {
@@ -53,12 +49,13 @@ function AddonsTable({ addons }: AddonsTableProps) {
           <TableRow>
             <TableCell>AddOn</TableCell>
             <TableCell>Status</TableCell>
+            <TableCell>Addon Version</TableCell>
             <TableCell>Game Version</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {addons.map((addon) => (
-            <AddonRow key={addon.title} data={addon} />
+            <AddonRow key={addon.addonInfo?.name} data={addon} />
           ))}
         </TableBody>
       </Table>
@@ -67,15 +64,17 @@ function AddonsTable({ addons }: AddonsTableProps) {
 }
 
 type AddonRowProps = {
-  data: AddonData;
+  data: InstalledAddon;
 };
 
 function AddonRow({ data }: AddonRowProps) {
+  console.log(data);
   return (
     <TableRow key={data.name}>
-      <TableCell>{data.title}</TableCell>
+      <TableCell>{data.addonInfo?.name}</TableCell>
       <TableCell>N/A</TableCell>
-      <TableCell>{data.interface}</TableCell>
+      <TableCell>{data.version}</TableCell>
+      <TableCell>{data.installedFile?.gameVersion}</TableCell>
     </TableRow>
   );
 }

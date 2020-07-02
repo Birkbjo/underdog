@@ -128,11 +128,12 @@ export enum ReleaseType {
 }
 
 export interface InstalledAddon {
-  scannedAddon?: ScannedAddonData;
   addonInfo?: AddonSearchResult;
+  scannedAddon?: ScannedAddonData;
   linked: boolean;
   installed: boolean;
   id: AddonSearchResult['id'];
+  name: string;
   zipChecksum?: string;
   dirChecksum: string;
   installedDate: string;

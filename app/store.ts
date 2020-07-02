@@ -3,16 +3,32 @@ import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
+import {
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
+import createElectronStorage from 'redux-persist-electron-storage';
 // eslint-disable-next-line import/no-cycle
 import createRootReducer from './rootReducer';
 
 export const history = createHashHistory();
-
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
 const router = routerMiddleware(history);
-const middleware = [...getDefaultMiddleware(), router];
+const middleware = [
+  ...getDefaultMiddleware({
+    serializableCheck: {
+      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    },
+  }),
+  router,
+];
 
 const excludeLoggerEnvs = ['test', 'production'];
 const shouldIncludeLogger = !excludeLoggerEnvs.includes(
@@ -48,4 +64,15 @@ export const configuredStore = (initialState?: RootState) => {
 export const store = configuredStore();
 
 export type Store = ReturnType<typeof configuredStore>;
+export const persistor = persistStore(store);
+//persistor.purge();
+
+declare global {
+  interface Window {
+    persistor: typeof persistor;
+  }
+}
+
+window.persistor = persistor;
+
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
