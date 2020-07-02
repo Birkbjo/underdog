@@ -1,6 +1,6 @@
 {
   "name": "electron-react-boilerplate",
-  "productName": "RemoveCurse",
+  "productName": "Underdog Addon Manager",
   "version": "1.2.0",
   "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
   "scripts": {
@@ -52,8 +52,8 @@
     ]
   },
   "build": {
-    "productName": "RemoveCurse",
-    "appId": "dev.birk.RemoveCurse",
+    "productName": "Underdog Addon Manager",
+    "appId": "dev.birk.Underdog",
     "files": [
       "dist/",
       "node_modules/",
@@ -97,13 +97,12 @@
     "publish": {
       "provider": "github",
       "owner": "birkbjo",
-      "repo": "RemoveCurse",
       "private": false
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/birkbjo/RemoveCurse.git"
+    "url": "git+https://github.com/birkbjo/Underdog.git"
   },
   "author": {
     "name": "Birk Johansson",
@@ -119,7 +118,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/birkbjo/RemoveCurse/issues"
+    "url": "https://github.com/birkbjo/Underdog/issues"
   },
   "keywords": [
     "electron",
@@ -133,7 +132,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/birkbjo/RemoveCurse#readme",
+  "homepage": "https://github.com/birkbjo/Underdog#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
