@@ -27,6 +27,8 @@ jobs:
       - name: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_KEYCHAIN: ${{ secrets.CSC_KEYCHAIN }}
         run: |
           yarn package-ci
 
