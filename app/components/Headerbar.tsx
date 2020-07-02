@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
-import removeCurseSrc from '../assets/removecurse.jpg';
+import logoSrc from '../assets/logo.png';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,13 +29,9 @@ export default function Headerbar() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <img
-          className={classes.menuButton}
-          src={removeCurseSrc}
-          alt="removecurse"
-        />
-        <Typography variant="h6" className={classes.title}>
-          RemoveCurse
+        <img className={classes.menuButton} src={logoSrc} alt="logo" />
+        <Typography variant="subtitle1" className={classes.title}>
+          Underdog Addon Manager
         </Typography>
         <Button color="inherit">Login</Button>
       </Toolbar>

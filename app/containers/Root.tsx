@@ -15,6 +15,12 @@ type Props = {
 const darkTheme = createMuiTheme({
   palette: {
     type: 'dark',
+    primary: {
+      main: '#212121',
+    },
+    secondary: {
+      main: '#ffc408',
+    },
   },
 });
 
