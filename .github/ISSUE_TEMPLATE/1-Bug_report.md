@@ -8,7 +8,6 @@ labels: 'bug'
 
 <!--- Provide a general summary of the issue in the Title above -->
 
-
 ## Expected Behavior
 
 <!--- If you're describing a bug, tell us what should happen -->
@@ -35,11 +34,9 @@ labels: 'bug'
 
 3.
 
-
 ## Context
 
 <!--- How has this issue affected you? What are you trying to accomplish? -->
-<!--- Did you make any changes to the boilerplate after cloning it? -->
 <!--- Providing context helps us come up with a solution that is most useful in the real world -->
 
 ## Your Environment

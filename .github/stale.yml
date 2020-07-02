@@ -6,7 +6,6 @@ daysUntilClose: 7
 exemptLabels:
   - pr
   - discussion
-  - e2e
   - enhancement
 # Comment to post when marking an issue as stale. Set to `false` to disable
 markComment: >
