@@ -206,7 +206,7 @@ export default merge.smart(baseConfig, {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
       DEBUG_PROD: false,
-      E2E_BUILD: false,
+      E2E_BUILD: 'true',
     }),
 
     new MiniCssExtractPlugin({

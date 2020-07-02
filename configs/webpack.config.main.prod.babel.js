@@ -14,6 +14,8 @@ import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps';
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
+console.log('ENV IS', process.env.NODE_ENV);
+console.log('E2EBUILD IS', process.env.E2E_BUILD);
 export default merge.smart(baseConfig, {
   devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
 
@@ -60,7 +62,7 @@ export default merge.smart(baseConfig, {
       NODE_ENV: 'production',
       DEBUG_PROD: false,
       START_MINIMIZED: false,
-      E2E_BUILD: false,
+      E2E_BUILD: 'true',
     }),
   ],
 
