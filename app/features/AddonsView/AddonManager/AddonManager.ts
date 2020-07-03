@@ -154,13 +154,13 @@ class AddonManager {
     };
   }
 
-  async installLatestFile(
+  static getLatestFile(
     addon: AddonSearchResult,
     installOptions: InstallOptions = {
       gameFlavor: 'wow_retail',
       releaseType: ReleaseType.Release,
     }
-  ): Promise<InstalledAddon> {
+  ): AddonFile | undefined {
     const sortedFiles = addon.latestFiles
       .filter(
         (f) =>
@@ -171,12 +171,24 @@ class AddonManager {
     const latestFile = sortedFiles[0];
 
     if (!latestFile) {
-      throw new Error(
+      console.log(
         `Could not find a latest version for addon ${
           addon.name
         } with options ${JSON.stringify(installOptions, undefined, 4)}`
       );
     }
+
+    return latestFile;
+  }
+
+  async installLatestFile(
+    addon: AddonSearchResult,
+    installOptions: InstallOptions = {
+      gameFlavor: 'wow_retail',
+      releaseType: ReleaseType.Release,
+    }
+  ): Promise<InstalledAddon> {
+    const latestFile = await AddonManager.getLatestFile(addon, installOptions);
 
     return this.installFile(addon, latestFile);
   }

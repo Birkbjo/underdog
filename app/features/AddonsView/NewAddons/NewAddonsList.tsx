@@ -15,6 +15,7 @@ import {
 import { selectResult } from './newAddonsSlice';
 import { installAddon } from '../effects';
 import { AddonSearchResult } from '../types';
+import AddonManager from '../AddonManager/AddonManager';
 
 type AddonsTableProps = {
   addons: AddonSearchResult[];
@@ -52,12 +53,13 @@ function NewAddonsTable({ addons }: AddonsTableProps) {
             <TableCell>Name</TableCell>
             <TableCell></TableCell>
             <TableCell>Status</TableCell>
+            <TableCell>Addon Version</TableCell>
             <TableCell>Game Version</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {addons.map((addon) => (
-            <AddonRow key={addon.name} data={addon} />
+            <AddonRow key={addon.name} addonInfo={addon} />
           ))}
         </TableBody>
       </Table>
@@ -69,18 +71,22 @@ type AddonRowProps = {
   data: AddonSearchResult;
 };
 
-function AddonRow({ data }: AddonRowProps) {
-  const { latestFiles } = data;
+function AddonRow({ addonInfo }: AddonRowProps) {
+  const { latestFiles } = addonInfo;
   const dispatch = useDispatch();
-  console.log(latestFiles);
-  const thumb = data.attachments[0];
+  const latestFile = AddonManager.getLatestFile(addonInfo);
+  const thumb = addonInfo.attachments[0];
+
+  if (!latestFile) {
+    return null;
+  }
 
   const handleInstall = async (id) => {
     const installedAddon = await dispatch(installAddon(id));
   };
   //const latestFile = latestFiles.sort((a, b) => b.fileDate - a.fileDate)[0];
   return (
-    <TableRow key={data.name}>
+    <TableRow key={addonInfo.name}>
       <TableCell>
         {thumb ? (
           <img src={thumb.thumbnailUrl} width={64} alt="addonThumbnail" />
@@ -88,10 +94,12 @@ function AddonRow({ data }: AddonRowProps) {
           ''
         )}
       </TableCell>
-      <TableCell>{data.name}</TableCell>
+      <TableCell>{addonInfo.name}</TableCell>
       <TableCell>
-        <Button onClick={() => handleInstall(data.id)}>Install</Button>
+        <Button onClick={() => handleInstall(addonInfo.id)}>Install</Button>
       </TableCell>
+      <TableCell>N/A</TableCell>
+      <TableCell>{latestFile?.displayName || 'No version found'}</TableCell>
       <TableCell>N/A</TableCell>
     </TableRow>
   );

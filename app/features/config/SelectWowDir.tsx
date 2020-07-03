@@ -15,7 +15,7 @@ function getDefaultPath() {
     return '/Applications/World of Warcraft/_retail_';
   }
   if (os === 'win32') {
-    return 'C:/';
+    return 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
   }
   return '';
 }
