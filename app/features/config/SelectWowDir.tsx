@@ -20,6 +20,21 @@ function getDefaultPath() {
   return '';
 }
 
+function validateSelectedPath(path: String) {
+  const fs = require('fs');
+  const addonFolder = path + '/Interface/AddOns/';
+
+  console.log('Checking filepath: ' + addonFolder);
+
+  if (fs.existsSync(addonFolder)) {
+    console.log('Path is valid: ' + addonFolder);
+    return true;
+  } else {
+    console.log('Invalid path selected: ' + addonFolder);
+    return false;
+  }
+}
+
 export default function SelectWoWDir() {
   const dispatch = useDispatch();
   const path = useSelector(selectPath);
@@ -34,7 +49,11 @@ export default function SelectWoWDir() {
         properties: ['openDirectory'],
       })
       .then((res) => {
-        if (!res.canceled && res.filePaths) {
+        if (
+          !res.canceled &&
+          res.filePaths &&
+          validateSelectedPath(res.filePaths[0])
+        ) {
           const filePath = res.filePaths[0];
           dispatch(setPath({ path: filePath }));
           setOpen(false);
