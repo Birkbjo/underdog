@@ -22,7 +22,7 @@ function getDefaultPath() {
   return '';
 }
 
-function validateSelectedPath(wowDir: String) {
+function validateSelectedPath(wowDir: string) {
   const addonFolder = path.join(wowDir, 'Interface', 'Addons');
 
   console.log('Checking filepath: ' + addonFolder);
