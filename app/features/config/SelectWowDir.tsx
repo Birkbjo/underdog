@@ -4,6 +4,7 @@ import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
 import { fs } from 'fs';
+import { path } from 'path';
 import { setPath, selectPath } from './configSlice';
 import AddonManager from '../AddonsView/AddonManager/AddonManager';
 import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
@@ -21,8 +22,8 @@ function getDefaultPath() {
   return '';
 }
 
-function validateSelectedPath(path: String) {
-  const addonFolder = path + '/Interface/AddOns/';
+function validateSelectedPath(wowDir: String) {
+  const addonFolder = path.join(wowDir, 'Interface', 'Addons');
 
   console.log('Checking filepath: ' + addonFolder);
 
