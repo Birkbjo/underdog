@@ -17,6 +17,9 @@ function getDefaultPath() {
   if (os === 'win32') {
     return 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
   }
+  if (os === 'linux') {
+    return require('os').homedir();
+  }
   return '';
 }
 
