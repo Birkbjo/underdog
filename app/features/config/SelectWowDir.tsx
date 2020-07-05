@@ -39,15 +39,6 @@ export default function SelectWoWDir() {
           dispatch(setPath({ path: filePath }));
           setOpen(false);
           setScanning(true);
-          new AddonManager(filePath)
-            .scan()
-            .then((addons) => {
-              setScanning(false);
-              dispatch(setAddons(addons));
-              return addons;
-            })
-            //.then(() => persistor.flush())
-            .catch((e) => console.log(err, e));
         }
         return res;
       })

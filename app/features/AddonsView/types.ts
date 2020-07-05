@@ -127,6 +127,12 @@ export enum ReleaseType {
   Alpha,
 }
 
+export interface InstalledAddonSettings {
+  releaseType: ReleaseType;
+  autoUpdate: boolean;
+  ignore: boolean;
+}
+
 export interface InstalledAddon {
   addonInfo?: AddonSearchResult;
   scannedAddon?: ScannedAddonData;

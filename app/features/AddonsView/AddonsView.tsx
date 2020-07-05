@@ -1,4 +1,4 @@
-import React, { useState, SyntheticEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../../constants/routes.json';
@@ -20,6 +20,7 @@ import { TabPanel, TabContext, TabList } from '@material-ui/lab';
 import MyAddonsList from './MyAddons/MyAddonsList';
 import SelectWoWDir from '../config/SelectWowDir';
 import NewAddonsView from './NewAddons/NewAddonsView';
+import { scanAddons } from './effects';
 
 const useStyles = makeStyles({
   tabPanelContainer: {
@@ -31,6 +32,11 @@ const useStyles = makeStyles({
 });
 export default function AddonsView() {
   const [tab, setTab] = useState('0');
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(scanAddons());
+  }, [dispatch]);
 
   const handleChange = (_, newTab: string) => setTab(newTab);
 

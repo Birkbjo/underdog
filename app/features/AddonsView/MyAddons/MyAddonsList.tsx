@@ -1,4 +1,9 @@
-import React from 'react';
+import React, {
+  useState,
+  useCallback,
+  SyntheticEvent,
+  MouseEvent,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../../../constants/routes.json';
@@ -17,12 +22,27 @@ import {
   TableRow,
   Typography,
   makeStyles,
+  Menu,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  MenuProps,
 } from '@material-ui/core';
+import {
+  FolderOpen,
+  ArrowRight,
+  ExpandMore,
+  ExpandLess,
+} from '@material-ui/icons';
+import { shell } from 'electron';
 import { useAsync } from 'react-async-hook';
 import { selectAddons as selectMyAddons } from './myAddonsSlice';
 import { selectAddons } from '../addonsSlice';
-import SelectWoWDir from '../../config/SelectWowDir';
-import { InstalledAddon } from '../types';
+import { selectAddonPath, selectAddonRootPath } from '../../config/configSlice';
+import { InstalledAddon, AddonDirectory } from '../types';
 
 const useStyles = makeStyles({
   imageCell: {
@@ -51,8 +71,30 @@ export default function MyAddonsList() {
 type AddonsTableProps = {
   addons: InstalledAddon[];
 };
+interface AnchorPosition {
+  left: number;
+  top: number;
+}
 
 function AddonsTable({ addons }: AddonsTableProps) {
+  const [anchorPos, setAnchorPos] = useState<AnchorPosition | undefined>(
+    undefined
+  );
+  const [contextMenuAddon, setContextMenuAddon] = useState<
+    InstalledAddon | undefined
+  >(undefined);
+
+  const handleContextMenu = useCallback(
+    (event: MouseEvent, addon) => {
+      event.preventDefault();
+
+      setAnchorPos({ left: event.clientX, top: event.clientY });
+      setContextMenuAddon(addon);
+    },
+    [setContextMenuAddon]
+  );
+
+  const handleCloseContext = () => setAnchorPos(undefined);
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -67,23 +109,49 @@ function AddonsTable({ addons }: AddonsTableProps) {
         </TableHead>
         <TableBody>
           {addons.map((addon) => (
-            <AddonRow key={addon.addonInfo?.name} data={addon} />
+            <AddonRow
+              key={addon.addonInfo?.name}
+              data={addon}
+              onContextMenu={handleContextMenu}
+            />
           ))}
         </TableBody>
       </Table>
+      <AddonRowContextMenu
+        onClose={handleCloseContext}
+        anchorPosition={anchorPos}
+        addon={contextMenuAddon}
+      />
     </TableContainer>
   );
 }
 
 type AddonRowProps = {
   data: InstalledAddon;
+  onContextMenu(event: React.MouseEvent, addon: InstalledAddon): void;
 };
 
-function AddonRow({ data }: AddonRowProps) {
+/*
+  Context-menu
+  Reinstall
+  View Addon website
+  Browse folders
+  View changelogs
+  Delete
+*/
+
+function AddonRow({ data, onContextMenu }: AddonRowProps) {
   const classes = useStyles(data);
   const logoUrl = data.addonInfo?.attachments[0]?.thumbnailUrl;
+  const mainDir = data.installedDirectiories?.find(
+    (dir) => dir.isModule === false
+  );
+
   return (
-    <TableRow key={data.name}>
+    <TableRow
+      key={data.name}
+      onContextMenu={(event) => onContextMenu(event, data)}
+    >
       <TableCell className={classes.imageCell} size="medium">
         <Avatar
           alt="addon-logo"
@@ -91,14 +159,103 @@ function AddonRow({ data }: AddonRowProps) {
           src={logoUrl}
           variant="rounded"
         />
-        {
-          //logoUrl && <img src={logoUrl} alt="addon logo" height="36px" />}
-        }
       </TableCell>
-      <TableCell>{data.addonInfo?.name}</TableCell>
+      <TableCell>
+        <ListItemText
+          primary={data.addonInfo?.name}
+          secondary={data.installedFile?.fileName}
+        />
+      </TableCell>
       <TableCell>N/A</TableCell>
-      <TableCell>{data.version || data.installedFile?.fileName}</TableCell>
+      <TableCell>{data.installedFile?.displayName}</TableCell>
       <TableCell>{data.installedFile?.gameVersion}</TableCell>
     </TableRow>
+  );
+}
+
+type ContextMenuProps = {
+  anchorPosition: AnchorPosition | undefined;
+  onClose(event: SyntheticEvent, reason: string): void;
+  addon: InstalledAddon | undefined;
+};
+
+function AddonRowContextMenu(props: ContextMenuProps) {
+  const { addon, anchorPosition, onClose } = props;
+  const [anchorEl, setAnchorEl] = useState<Element | undefined>(undefined);
+  const [open, setOpen] = useState(false);
+  const getAddonsPath = useSelector(selectAddonPath);
+
+  return (
+    <Menu
+      open={!!anchorPosition}
+      onClose={onClose}
+      anchorPosition={anchorPosition}
+      anchorReference="anchorPosition"
+    >
+      <MenuItem onClick={() => console.log('reinstall', addon)}>
+        Reinstall
+      </MenuItem>
+      <MenuItem>View Addon Website</MenuItem>
+      {addon?.installedDirectiories?.length === 1 ? (
+        <MenuItem
+          onClick={() =>
+            shell.openPath(getAddonsPath(addon?.installedDirectiories[0].name))
+          }
+        >
+          <ListItemIcon>
+            <FolderOpen />
+          </ListItemIcon>
+          <ListItemText primary="Browse Addon Folder" />
+        </MenuItem>
+      ) : (
+        <MenuItem
+          onClick={() => setOpen(!open)}
+          onMouseOver={(event) => setAnchorEl(event.currentTarget)}
+          onFocus={(event) => setAnchorEl(event.currentTarget)}
+        >
+          <ListItemText primary="Browse Addon Folders" />
+          <ArrowRight />
+        </MenuItem>
+      )}
+      <BrowseFoldersMenu
+        directories={addon?.installedDirectiories || []}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={() => setAnchorEl(undefined)}
+        getContentAnchorEl={null}
+      />
+    </Menu>
+  );
+}
+
+interface BrowseMenuProps extends MenuProps {
+  directories: AddonDirectory[];
+}
+
+function BrowseFoldersMenu(props: BrowseMenuProps) {
+  const { directories, anchorEl, onClose } = props;
+  const getAddonPath = useSelector(selectAddonPath);
+
+  return (
+    <Menu
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      anchorEl={anchorEl}
+      open={!!anchorEl}
+      onClose={onClose}
+      getContentAnchorEl={null}
+    >
+      {directories.map((dir) => (
+        <MenuItem
+          key={dir.name}
+          onClick={() => shell.openPath(getAddonPath(dir.name))}
+        >
+          <ListItemIcon>
+            <FolderOpen />
+          </ListItemIcon>
+          <ListItemText primary={dir.name} />
+        </MenuItem>
+      ))}
+    </Menu>
   );
 }

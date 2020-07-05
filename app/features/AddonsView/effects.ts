@@ -1,27 +1,58 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import CurseForgeAPI from './CurseForgeAPI';
 import { ScannedAddonData, InstalledAddon } from './types';
-import { addAddon } from './addonsSlice';
+import { addAddon, selectAddons } from './addonsSlice';
 import { selectResult } from './NewAddons/newAddonsSlice';
+import { setAddons as setScannedAddons } from './MyAddons/myAddonsSlice';
 import { getWithState as getAddonManager } from './AddonManager/AddonManager';
 import { RootState } from './../../store';
+
+export const scanAddons = createAsyncThunk(
+  'myAddons/scan',
+  async (args, thunkAPI) => {
+    const state = thunkAPI.getState() as RootState;
+    const addonManager = getAddonManager();
+    const installedAddons = selectAddons(state);
+
+    const installedDirs = installedAddons.flatMap((a) =>
+      a.installedDirectiories?.map((d) => d.name)
+    );
+
+    console.log('installedolfders', installedDirs);
+    const scanResult = await addonManager.scan();
+
+    const addonMatches = [];
+    const unmatched = [];
+    const unknownAddons = scanResult
+      .filter((s) => !installedDirs.includes(s.shortName))
+      .map(async (sa) => {
+        console.log('no info for', sa);
+        const searchResult = await CurseForgeAPI.search(sa.title);
+        const addonMatch = searchResult.find((sr) => sr.name === sa.title);
+        if (addonMatch) {
+        } else {
+          console.warn('No info found for', sa.title);
+          return null;
+          //    searchResult[0].lat;
+        }
+      });
+  }
+  // const
+);
 
 export const installAddon = createAsyncThunk(
   'addons/installAddon',
   async (id: number, thunkAPI) => {
-    console.log('install addon act');
     const state = thunkAPI.getState() as RootState;
-    console.log(state);
     const manager = getAddonManager();
-    console.log('manager is', manager);
     const searchResult = selectResult(state).find((sr) => sr.id === id);
-    console.log(searchResult);
+
     if (!searchResult) {
       console.log('no search res');
       return thunkAPI.rejectWithValue('No searchresult with id ');
     }
+
     const installed = await manager.installLatestFile(searchResult);
-    console.log('Installed addon', installed);
     thunkAPI.dispatch(addAddon(installed));
     return installed;
   }

@@ -51,7 +51,7 @@ function NewAddonsTable({ addons }: AddonsTableProps) {
           <TableRow>
             <TableCell />
             <TableCell>Name</TableCell>
-            <TableCell></TableCell>
+            <TableCell />
             <TableCell>Status</TableCell>
             <TableCell>Addon Version</TableCell>
             <TableCell>Game Version</TableCell>

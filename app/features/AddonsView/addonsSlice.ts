@@ -9,7 +9,6 @@ import {
 import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
 import { persistReducer } from 'redux-persist';
 import createElectronStorage from 'redux-persist-electron-storage';
-import storage from 'redux-persist/lib/storage/';
 import myAddonsReducer, {
   setAddons as setScannedAddons,
 } from './MyAddons/myAddonsSlice';
