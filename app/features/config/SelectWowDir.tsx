@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
+import { fs } from 'fs';
 import { setPath, selectPath } from './configSlice';
 import AddonManager from '../AddonsView/AddonManager/AddonManager';
 import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
@@ -21,7 +22,6 @@ function getDefaultPath() {
 }
 
 function validateSelectedPath(path: String) {
-  const fs = require('fs');
   const addonFolder = path + '/Interface/AddOns/';
 
   console.log('Checking filepath: ' + addonFolder);
