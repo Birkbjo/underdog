@@ -141,9 +141,9 @@ export interface InstalledAddon {
   id: AddonSearchResult['id'];
   name: string;
   zipChecksum?: string;
-  dirChecksum: string;
-  installedDate: string;
+  dirChecksum?: string;
+  installedDate?: string;
   installedDirectiories?: AddonDirectory[];
   installedFile?: AddonFile;
-  version: string;
+  version?: string;
 }

@@ -28,6 +28,7 @@ const installedAddonsAdapter = createEntityAdapter<InstalledAddon>({
 });
 
 export type InstalledAddonsState = EntityState<InstalledAddon>;
+
 const initialState: InstalledAddonsSlice = {
   list: [],
 };
@@ -37,12 +38,13 @@ const addonsSlice = createSlice({
   initialState: installedAddonsAdapter.getInitialState(),
   reducers: {
     addAddon: installedAddonsAdapter.addOne,
+    addManyAddons: installedAddonsAdapter.addMany,
   },
   extraReducers: (builder) =>
     builder.addCase(setScannedAddons, (state, action) => {}),
 });
 
-export const { addAddon } = addonsSlice.actions;
+export const { addAddon, addManyAddons } = addonsSlice.actions;
 
 const {
   selectAll,
