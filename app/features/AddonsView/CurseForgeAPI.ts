@@ -18,7 +18,6 @@ class CurseForgeAPI {
   }
 
   request(url: RequestInfo, fetchOpts: RequestInit = {}) {
-    type PartialCacheParams = 'force-cache' | 'reload';
     const currentTS = new Date().getTime();
 
     const timeSinceLastReq =
@@ -28,14 +27,15 @@ class CurseForgeAPI {
 
     if (cacheStrategy === 'reload') {
       this.cache[url.toString()] = currentTS;
+      // naively nuke cache if big
       if (Object.keys(this.cache).length > 500) {
         this.cache = {};
       }
     }
 
-    const mergedOpts = {
+    const mergedOpts: RequestInit = {
       ...fetchOpts,
-      cache: cacheStrategy as PartialCacheParams,
+      cache: cacheStrategy,
     };
 
     return fetch(url, mergedOpts);
@@ -65,6 +65,21 @@ class CurseForgeAPI {
     const featuredAddons = await res.json();
 
     return featuredAddons.popular as AddonSearchResult[];
+  }
+
+  async getAddonsInfo(ids: string[]): Promise<AddonSearchResult[]> {
+    const url = `${this.baseURL}`;
+    const res = await this.request(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(ids),
+    });
+
+    const addonsInfo = await res.json();
+    console.log('ADDONSINFO', addonsInfo);
+    return addonsInfo;
   }
 }
 
