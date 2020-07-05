@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
-import { os } from 'os';
+import { homedir } from 'os';
 import { setPath, selectPath } from './configSlice';
 import AddonManager from '../AddonsView/AddonManager/AddonManager';
 import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
@@ -19,7 +19,7 @@ function getDefaultPath() {
     return 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
   }
   if (os === 'linux') {
-    return os.homedir();
+    return homedir();
   }
   return '';
 }
