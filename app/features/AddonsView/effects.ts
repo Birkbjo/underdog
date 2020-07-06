@@ -46,15 +46,41 @@ export const scanAddons = createAsyncThunk(
           return null;
         }
         console.log('no info for', sa, ' ', matchedDirs);
+
         const searchResult = await CurseForgeAPI.search(sa.title);
+        console.log('searched for', sa.title);
         // TODO: check sa.shortName against modules of matches
-        const addonMatch = searchResult.find((sr) => sr.name === sa.title);
+        let addonMatch: AddonSearchResult | undefined;
+        const addonDirectMatch = searchResult.find(
+          (sr) => sr.name === sa.title
+        );
+        addonMatch = addonDirectMatch;
+        console.log('searchRes', searchResult);
+        const moduleMatch = searchResult.find((sr) => {
+          const latestFile = AddonManager.getLatestFile(sr);
+          return (
+            !!latestFile &&
+            latestFile.modules.find(
+              (m) => m.foldername === sa.shortName && m.type === 2
+            )
+          );
+        });
+
+        if (!addonMatch && moduleMatch) {
+          console.log(
+            'No direct match found, but found matching module',
+            sa.shortName,
+            ' on ',
+            moduleMatch.name
+          );
+          addonMatch = moduleMatch;
+        }
 
         if (addonMatch) {
           console.log(addonMatch);
           const latestFile = AddonManager.getLatestFile(addonMatch);
           let matchedVersion;
-          let installedDirectiories: AddonDirectory[] = undefined;
+          let installedDirectiories: AddonDirectory[] | undefined;
           if (latestFile) {
             installedDirectiories = latestFile.modules.map((m) => {
               matchedDirs.push(m.foldername);
@@ -101,7 +127,7 @@ export const scanAddons = createAsyncThunk(
         !matchedAddons.find(
           (a) =>
             a.addonInfo &&
-            AddonManager.getLatestFile(a.addonInfo).modules.find(
+            AddonManager.getLatestFile(a.addonInfo)?.modules.find(
               (m) => m.foldername === d.shortName
             )
         )
@@ -110,6 +136,19 @@ export const scanAddons = createAsyncThunk(
     console.log('UNMATCHED', unmatched);
     console.log('unatchfiltered', unmatchedFiltered);
     thunkAPI.dispatch(addManyAddons(matchedAddons));
+    // Remove addons that are installed in Underdog, but not found in folder
+    const notFoundDirs = installedDirs
+      .filter((dirName) => !scanResult.find((sr) => sr.shortName === dirName))
+      .map(
+        (dirName) =>
+          // find the addon with this directory
+          installedAddons.find((addon) =>
+            addon.installedDirectiories?.find((dir) => dir.name === dirName)
+          )?.id
+      )
+      .filter((dir) => dir !== undefined) as number[];
+    console.log('Dirs installed but not found', notFoundDirs);
+    thunkAPI.dispatch(removeManyAddons(notFoundDirs));
   }
   // const
 );
