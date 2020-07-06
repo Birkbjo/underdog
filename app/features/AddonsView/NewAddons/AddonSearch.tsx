@@ -17,7 +17,9 @@ import {
   TextField,
   Toolbar,
   AppBar,
+  InputAdornment,
 } from '@material-ui/core';
+import { Search, Clear } from '@material-ui/icons';
 import { useAsync } from 'react-async-hook';
 import CurseForgeAPI from '../CurseForgeAPI';
 import { setSearchResult } from './newAddonsSlice';
@@ -30,12 +32,17 @@ const useStyles = makeStyles((theme) => ({
   searchField: {
     padding: 5,
   },
+  searchFieldClear: {
+    cursor: 'pointer',
+    visibility: (props) => (props.search ? 'visible' : 'hidden'),
+  },
 }));
 
-export default function AddonSearch() {
+export default function AddonSearch(props) {
   const [search, setSearch] = useState('');
   const [prevSearch, setPrevSearch] = useState(search);
   const dispatch = useDispatch();
+  const classes = useStyles({ ...props, search });
   // const { loading, error, result } = useAsync(CurseForgeAPI.search, [search]);
   //const addons = useSelector(selectAddons);
 
@@ -63,11 +70,28 @@ export default function AddonSearch() {
   return (
     <TextField
       value={search}
+      color="secondary"
       placeholder="Search AddOns"
       onChange={({ target: { value } }) => setSearch(value)}
       label="Search"
-      type="search"
       onKeyDown={handleEnter}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Search />
+          </InputAdornment>
+        ),
+        endAdornment: (
+          <InputAdornment
+            className={classes.searchFieldClear}
+            position="end"
+            onClick={() => setSearch('')}
+          >
+            <Clear />
+          </InputAdornment>
+        ),
+        color: 'secondary',
+      }}
     />
   );
 }
