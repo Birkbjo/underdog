@@ -43,6 +43,7 @@ import { selectAddons as selectMyAddons } from './myAddonsSlice';
 import { selectAddons } from '../addonsSlice';
 import { selectAddonPath, selectAddonRootPath } from '../../config/configSlice';
 import { InstalledAddon, AddonDirectory } from '../types';
+import { uninstallAddon } from '../effects';
 
 const useStyles = makeStyles({
   imageCell: {
@@ -184,6 +185,7 @@ function AddonRowContextMenu(props: ContextMenuProps) {
   const [anchorEl, setAnchorEl] = useState<Element | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const getAddonsPath = useSelector(selectAddonPath);
+  const dispatch = useDispatch();
 
   return (
     <Menu
@@ -225,6 +227,9 @@ function AddonRowContextMenu(props: ContextMenuProps) {
         onClose={() => setAnchorEl(undefined)}
         getContentAnchorEl={null}
       />
+      <MenuItem onClick={() => dispatch(uninstallAddon(addon.id))}>
+        <Typography color="error">Uninstall Addon</Typography>
+      </MenuItem>
     </Menu>
   );
 }

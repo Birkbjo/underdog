@@ -192,6 +192,23 @@ class AddonManager {
 
     return this.installFile(addon, latestFile);
   }
+
+  async uninstallAddon(addon: InstalledAddon): Promise<boolean> {
+    const folders = addon.installedDirectiories.map((dir) => {
+      const dirPath = path.join(this.addonsPath, dir.name);
+      return fs.promises.rmdir(dirPath, {
+        recursive: true,
+      });
+    });
+
+    try {
+      await Promise.all(folders);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
 }
 
 interface InstallOptions {

@@ -1,7 +1,19 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import CurseForgeAPI from './CurseForgeAPI';
-import { ScannedAddonData, InstalledAddon, AddonDirectory } from './types';
-import { addAddon, addManyAddons, selectAddons } from './addonsSlice';
+import {
+  ScannedAddonData,
+  InstalledAddon,
+  AddonDirectory,
+  AddonSearchResult,
+} from './types';
+import {
+  addAddon,
+  addManyAddons,
+  selectAddons,
+  selectById,
+  removeAddon,
+  removeManyAddons,
+} from './addonsSlice';
 import { selectResult } from './NewAddons/newAddonsSlice';
 import { setAddons as setScannedAddons } from './MyAddons/myAddonsSlice';
 import AddonManager, {
@@ -117,6 +129,26 @@ export const installAddon = createAsyncThunk(
     const installed = await manager.installLatestFile(searchResult);
     thunkAPI.dispatch(addAddon(installed));
     return installed;
+  }
+);
+
+export const uninstallAddon = createAsyncThunk(
+  'addons/uninstall',
+  async (id: number, { dispatch, getState, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const addon = selectById(state, id);
+    const addonManager = getAddonManager();
+
+    if (addon === undefined) {
+      return rejectWithValue(`Addon with id ${id} not found`);
+    }
+    try {
+      await addonManager.uninstallAddon(addon);
+      dispatch(removeAddon(id));
+      return id;
+    } catch (e) {
+      return rejectWithValue(e);
+    }
   }
 );
 

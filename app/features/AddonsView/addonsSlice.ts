@@ -39,14 +39,21 @@ const addonsSlice = createSlice({
   reducers: {
     addAddon: installedAddonsAdapter.addOne,
     addManyAddons: installedAddonsAdapter.addMany,
+    removeAddon: installedAddonsAdapter.removeOne,
+    removeManyAddons: installedAddonsAdapter.removeMany,
   },
   extraReducers: (builder) =>
     builder.addCase(setScannedAddons, (state, action) => {}),
 });
 
-export const { addAddon, addManyAddons } = addonsSlice.actions;
+export const {
+  addAddon,
+  addManyAddons,
+  removeAddon,
+  removeManyAddons,
+} = addonsSlice.actions;
 
-const {
+export const {
   selectAll,
   selectTotal,
   selectIds,
