@@ -1,10 +1,9 @@
-import { RootState } from './../../store';
 import { createSlice, EntityState } from '@reduxjs/toolkit';
-// eslint-disable-next-line import/no-cycle
 import { persistReducer } from 'redux-persist';
 import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
 import createElectronStorage from 'redux-persist-electron-storage';
 import path from 'path';
+import type { RootState } from '../../store';
 
 const electronStore = createElectronStorage({
   electronStoreOpts: {
@@ -13,11 +12,13 @@ const electronStore = createElectronStorage({
 });
 
 export interface Config {
-  path: string;
+  paths: Record<string, string>;
+  selectedPath: string;
 }
 
 const initialState: Config = {
-  path: '',
+  paths: {},
+  selectedPath: undefined,
 };
 
 const configSlice = createSlice({
@@ -25,8 +26,12 @@ const configSlice = createSlice({
   initialState,
   reducers: {
     setPath: (state, action) => {
-      const { path } = action.payload;
-      state.path = path;
+      const { path: selectedPath } = action.payload;
+      const split = selectedPath.split(path.sep);
+      const lastPart = split[split.length - 1];
+
+      state.paths[lastPart] = selectedPath;
+      state.selectedPath = lastPart;
     },
   },
 });
@@ -43,7 +48,8 @@ const persistedReducer = persistReducer<Config>(
 export default persistedReducer;
 export const { setPath } = configSlice.actions;
 
-export const selectPath = (state: RootState) => state.config.path;
+export const selectPath = (state: RootState) =>
+  state.config.paths[state.config.selectedPath];
 export const selectAddonRootPath = (state: RootState) =>
   path.join(selectPath(state), 'Interface', 'AddOns');
 

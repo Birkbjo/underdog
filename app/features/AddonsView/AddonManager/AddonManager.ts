@@ -13,7 +13,7 @@ import {
 } from '../types';
 import { store } from '../../../store';
 import { extractZip, computeDirHash } from '../../../utils/utils';
-
+import { selectPath } from '../../config/configSlice';
 class AddonManager {
   installationPath: string;
 
@@ -144,7 +144,7 @@ class AddonManager {
       name: addonInfo.name,
       addonInfo,
       installed: true,
-      linked: false,
+      linked: true,
       installedDate: new Date().toISOString(),
       zipChecksum,
       dirChecksum: dirHash,
@@ -222,12 +222,12 @@ export default AddonManager;
 let addonManagerFromState: AddonManager;
 export function getWithState(overridePath?: string): AddonManager {
   console.log('in addonmanagerget');
-  if (addonManagerFromState) {
+  if (!overridePath && addonManagerFromState) {
     console.log('return stored', addonManagerFromState);
     return addonManagerFromState;
   }
   const state = store.getState();
-  const { path: installationPath } = state.config;
+  const installationPath = selectPath(state);
   addonManagerFromState = new AddonManager(overridePath || installationPath);
 
   return addonManagerFromState;

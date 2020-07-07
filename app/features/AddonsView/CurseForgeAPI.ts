@@ -19,24 +19,27 @@ class CurseForgeAPI {
 
   request(url: RequestInfo, fetchOpts: RequestInit = {}) {
     const currentTS = new Date().getTime();
+    let mergedOpts = fetchOpts;
 
-    const timeSinceLastReq =
-      currentTS - this.cache[url.toString()] || this.cacheTTL;
-    const cacheStrategy =
-      timeSinceLastReq < this.cacheTTL ? 'force-cache' : 'reload';
+    if (!fetchOpts.cache) {
+      const timeSinceLastReq =
+        currentTS - this.cache[url.toString()] || this.cacheTTL;
+      const cacheStrategy =
+        timeSinceLastReq < this.cacheTTL ? 'force-cache' : 'reload';
 
-    if (cacheStrategy === 'reload') {
-      this.cache[url.toString()] = currentTS;
-      // naively nuke cache if big
-      if (Object.keys(this.cache).length > 500) {
-        this.cache = {};
+      if (cacheStrategy === 'reload') {
+        this.cache[url.toString()] = currentTS;
+        // naively nuke cache if big
+        if (Object.keys(this.cache).length > 500) {
+          this.cache = {};
+        }
       }
-    }
 
-    const mergedOpts: RequestInit = {
-      ...fetchOpts,
-      cache: cacheStrategy,
-    };
+      mergedOpts = {
+        ...fetchOpts,
+        cache: cacheStrategy,
+      };
+    }
 
     return fetch(url, mergedOpts);
   }
@@ -67,7 +70,15 @@ class CurseForgeAPI {
     return featuredAddons.popular as AddonSearchResult[];
   }
 
-  async getAddonsInfo(ids: string[]): Promise<AddonSearchResult[]> {
+  async getAddonInfo(id: string | number): Promise<AddonSearchResult> {
+    const url = `${this.baseURL}/${id}`;
+    const res = await this.request(url, {
+      cache: 'default',
+    });
+    return res.json();
+  }
+
+  async getAddonsInfo(ids: (string | number)[]): Promise<AddonSearchResult[]> {
     const url = `${this.baseURL}`;
     const res = await this.request(url, {
       headers: {
@@ -75,10 +86,10 @@ class CurseForgeAPI {
       },
       method: 'POST',
       body: JSON.stringify(ids),
+      cache: 'default',
     });
 
     const addonsInfo = await res.json();
-    console.log('ADDONSINFO', addonsInfo);
     return addonsInfo;
   }
 }

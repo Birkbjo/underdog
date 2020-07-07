@@ -12,7 +12,6 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import createElectronStorage from 'redux-persist-electron-storage';
 // eslint-disable-next-line import/no-cycle
 import createRootReducer from './rootReducer';
 

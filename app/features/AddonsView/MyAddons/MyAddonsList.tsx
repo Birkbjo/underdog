@@ -5,12 +5,10 @@ import React, {
   MouseEvent,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import routes from '../../../constants/routes.json';
 
 import {
   Avatar,
-  Button as MButton,
+  Button,
   Box,
   Paper,
   Card,
@@ -30,28 +28,35 @@ import {
   ListItemText,
   Collapse,
   MenuProps,
+  TableCellProps,
 } from '@material-ui/core';
 import {
   FolderOpen,
   ArrowRight,
   ExpandMore,
   ExpandLess,
+  Launch,
 } from '@material-ui/icons';
 import { shell } from 'electron';
 import { useAsync } from 'react-async-hook';
 import { selectAddons as selectMyAddons } from './myAddonsSlice';
 import { selectAddons } from '../addonsSlice';
 import { selectAddonPath, selectAddonRootPath } from '../../config/configSlice';
-import { InstalledAddon, AddonDirectory } from '../types';
-import { uninstallAddon } from '../effects';
+import { InstalledAddon, AddonDirectory, AddonSearchResult } from '../types';
+import { uninstallAddon, installAddon } from '../effects';
+import { selectById } from '../updateAddonsSlice';
+import { RootState } from '../../../store';
+import AddonManager from '../AddonManager/AddonManager';
 
 const useStyles = makeStyles({
   imageCell: {
     paddingRight: 0,
     width: 48,
     height: 48,
-    //  backgroundPosition: 'center',
-    //backgroundSize: 'cover',
+  },
+  menuOpenExternalIcon: {
+    justifyContent: 'flex-end',
+    fontSize: '18px',
   },
 });
 export default function MyAddonsList() {
@@ -95,7 +100,7 @@ function AddonsTable({ addons }: AddonsTableProps) {
     [setContextMenuAddon]
   );
 
-  const handleCloseContext = () => setAnchorPos(undefined);
+  const handleCloseContextMenu = () => setAnchorPos(undefined);
   return (
     <TableContainer component={Paper}>
       <Table aria-label="simple table">
@@ -118,11 +123,13 @@ function AddonsTable({ addons }: AddonsTableProps) {
           ))}
         </TableBody>
       </Table>
-      <AddonRowContextMenu
-        onClose={handleCloseContext}
-        anchorPosition={anchorPos}
-        addon={contextMenuAddon}
-      />
+      {contextMenuAddon && (
+        <AddonRowContextMenu
+          onClose={handleCloseContextMenu}
+          anchorPosition={anchorPos}
+          addon={contextMenuAddon}
+        />
+      )}
     </TableContainer>
   );
 }
@@ -143,10 +150,11 @@ type AddonRowProps = {
 
 function AddonRow({ data, onContextMenu }: AddonRowProps) {
   const classes = useStyles(data);
+  const updateInfo = useSelector((state: RootState) => {
+    console.log('STATE IS', state);
+    return selectById(state, data.id);
+  });
   const logoUrl = data.addonInfo?.attachments[0]?.thumbnailUrl;
-  const mainDir = data.installedDirectiories?.find(
-    (dir) => dir.isModule === false
-  );
 
   return (
     <TableRow
@@ -167,17 +175,46 @@ function AddonRow({ data, onContextMenu }: AddonRowProps) {
           secondary={data.installedFile?.fileName}
         />
       </TableCell>
-      <TableCell>N/A</TableCell>
-      <TableCell>{data.installedFile?.displayName}</TableCell>
+      <StatusCell addon={data} updateInfo={updateInfo} />
+      <TableCell>
+        {data.installedFile?.displayName ||
+          'Unable to get addon version. Click update to download latest version.'}
+      </TableCell>
       <TableCell>{data.installedFile?.gameVersion}</TableCell>
     </TableRow>
+  );
+}
+
+interface StatusCell extends TableCellProps {
+  addon: InstalledAddon;
+  updateInfo: AddonSearchResult | undefined;
+}
+function StatusCell(props: StatusCell) {
+  const { updateInfo, addon } = props;
+  const dispatch = useDispatch();
+  let hasUpdate = false;
+
+  if (updateInfo && addon.installedFile) {
+    console.log(updateInfo);
+    const latestFile = AddonManager.getLatestFile(updateInfo);
+    if (latestFile) {
+      hasUpdate = latestFile.displayName !== addon.installedFile.displayName;
+    }
+  }
+  const InstallButton = (
+    <Button onClick={() => dispatch(installAddon(addon.id))}>Update</Button>
+  );
+  return (
+    <TableCell>
+      {!addon.linked || hasUpdate ? InstallButton : 'Latest version'}
+    </TableCell>
   );
 }
 
 type ContextMenuProps = {
   anchorPosition: AnchorPosition | undefined;
   onClose(event: SyntheticEvent, reason: string): void;
-  addon: InstalledAddon | undefined;
+  addon: InstalledAddon;
 };
 
 function AddonRowContextMenu(props: ContextMenuProps) {
@@ -198,10 +235,10 @@ function AddonRowContextMenu(props: ContextMenuProps) {
         Reinstall
       </MenuItem>
       <MenuItem>View Addon Website</MenuItem>
-      {addon?.installedDirectiories?.length === 1 ? (
+      {addon.installedDirectiories?.length === 1 ? (
         <MenuItem
           onClick={() =>
-            shell.openPath(getAddonsPath(addon?.installedDirectiories[0].name))
+            shell.openPath(getAddonsPath(addon.installedDirectiories[0].name))
           }
         >
           <ListItemIcon>
@@ -220,7 +257,7 @@ function AddonRowContextMenu(props: ContextMenuProps) {
         </MenuItem>
       )}
       <BrowseFoldersMenu
-        directories={addon?.installedDirectiories || []}
+        directories={addon.installedDirectiories || []}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         anchorEl={anchorEl}
         open={!!anchorEl}
@@ -236,11 +273,13 @@ function AddonRowContextMenu(props: ContextMenuProps) {
 
 interface BrowseMenuProps extends MenuProps {
   directories: AddonDirectory[];
+  onClose: Exclude<MenuProps['onClose'], undefined>;
 }
 
 function BrowseFoldersMenu(props: BrowseMenuProps) {
   const { directories, anchorEl, onClose } = props;
   const getAddonPath = useSelector(selectAddonPath);
+  const classes = useStyles();
 
   return (
     <Menu
@@ -249,6 +288,7 @@ function BrowseFoldersMenu(props: BrowseMenuProps) {
       open={!!anchorEl}
       onClose={onClose}
       getContentAnchorEl={null}
+      MenuListProps={{ onMouseLeave: (e) => onClose(e, 'backdropClick') }}
     >
       {directories.map((dir) => (
         <MenuItem
@@ -259,6 +299,9 @@ function BrowseFoldersMenu(props: BrowseMenuProps) {
             <FolderOpen />
           </ListItemIcon>
           <ListItemText primary={dir.name} />
+          <ListItemIcon className={classes.menuOpenExternalIcon}>
+            <Launch fontSize="small" />
+          </ListItemIcon>
         </MenuItem>
       ))}
     </Menu>

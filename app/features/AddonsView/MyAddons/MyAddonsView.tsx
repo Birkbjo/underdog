@@ -22,14 +22,13 @@ import {
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import Header from './Header';
-import NewAddonsList from './NewAddonsList';
+import MyAddonsList from './MyAddonsList';
 
 export default function NewAddonsView() {
   return (
     <>
       <Header />
-
-      <NewAddonsList />
+      <MyAddonsList />
     </>
   );
 }

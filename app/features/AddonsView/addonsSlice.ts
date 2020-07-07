@@ -37,14 +37,28 @@ const addonsSlice = createSlice({
   name: 'installed',
   initialState: installedAddonsAdapter.getInitialState(),
   reducers: {
-    addAddon: installedAddonsAdapter.addOne,
-    addManyAddons: installedAddonsAdapter.addMany,
+    addAddon: installedAddonsAdapter.upsertOne,
+    addManyAddons: installedAddonsAdapter.upsertMany,
     removeAddon: installedAddonsAdapter.removeOne,
     removeManyAddons: installedAddonsAdapter.removeMany,
   },
   extraReducers: (builder) =>
     builder.addCase(setScannedAddons, (state, action) => {}),
 });
+
+const makeAddonsSlice = (name) =>
+  createSlice({
+    name,
+    initialState: installedAddonsAdapter.getInitialState(),
+    reducers: {
+      addAddon: installedAddonsAdapter.addOne,
+      addManyAddons: installedAddonsAdapter.addMany,
+      removeAddon: installedAddonsAdapter.removeOne,
+      removeManyAddons: installedAddonsAdapter.removeMany,
+    },
+    extraReducers: (builder) =>
+      builder.addCase(setScannedAddons, (state, action) => {}),
+  });
 
 export const {
   addAddon,
@@ -73,9 +87,14 @@ const persistedInstalledAddonsReducer = persistReducer<InstalledAddonsState>(
   },
   addonsSlice.reducer
 );
+export default persistedInstalledAddonsReducer;
 
-export default combineReducers({
-  myAddons: myAddonsReducer,
-  newAddons: newAddonsReducer,
-  installed: persistedInstalledAddonsReducer,
-});
+let current = makeAddonsSlice('_retail_');
+current = addonsSlice;
+// export default combineReducers({
+//   myAddons: myAddonsReducer,
+//   newAddons: newAddonsReducer,
+//   installed: persistedInstalledAddonsReducer,
+//   current: current.reducer,
+//   updates: updateAddonsReducer,
+// });

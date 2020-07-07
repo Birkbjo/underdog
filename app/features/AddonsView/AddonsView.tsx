@@ -17,11 +17,11 @@ import {
   Tabs,
 } from '@material-ui/core';
 import { TabPanel, TabContext, TabList } from '@material-ui/lab';
-import MyAddonsList from './MyAddons/MyAddonsList';
+import MyAddonsView from './MyAddons/MyAddonsView';
 import SelectWoWDir from '../config/SelectWowDir';
 import NewAddonsView from './NewAddons/NewAddonsView';
 import { scanAddons } from './effects';
-
+import { selectPath } from '../config/configSlice';
 const useStyles = makeStyles({
   tabPanelContainer: {
     height: 'calc(100vh - 230px)',
@@ -32,11 +32,12 @@ const useStyles = makeStyles({
 });
 export default function AddonsView() {
   const [tab, setTab] = useState('0');
+  const path = useSelector(selectPath);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(scanAddons());
-  }, [dispatch]);
+  }, [dispatch, path]);
 
   const handleChange = (_, newTab: string) => setTab(newTab);
 
@@ -49,7 +50,7 @@ export default function AddonsView() {
         </TabList>
         <TabPanels>
           <TabPanel value="0">
-            <MyAddonsList />
+            <MyAddonsView />
           </TabPanel>
           <TabPanel value="1">
             <NewAddonsView />

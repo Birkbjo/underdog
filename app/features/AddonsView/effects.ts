@@ -10,19 +10,20 @@ import {
   addAddon,
   addManyAddons,
   selectAddons,
+  selectIds,
   selectById,
   removeAddon,
   removeManyAddons,
 } from './addonsSlice';
 import { selectResult } from './NewAddons/newAddonsSlice';
-import { setAddons as setScannedAddons } from './MyAddons/myAddonsSlice';
 import AddonManager, {
   getWithState as getAddonManager,
 } from './AddonManager/AddonManager';
-import { RootState } from './../../store';
+import type { RootState } from '../../store';
+import { setSearchResult } from './newAddonsSlice';
 
 export const scanAddons = createAsyncThunk(
-  'myAddons/scan',
+  'addons/scan',
   async (args, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
     const addonManager = getAddonManager();
@@ -103,7 +104,7 @@ export const scanAddons = createAsyncThunk(
             id: addonMatch.id,
             name: addonMatch.name,
             version: matchedVersion,
-            installedFile: latestFile || undefined,
+            installedFile: matchedVersion ? latestFile : undefined,
             installedDirectiories,
           };
           return addon;
@@ -117,7 +118,7 @@ export const scanAddons = createAsyncThunk(
 
     const matchedAddons: InstalledAddon[] = (
       await Promise.all(matchedAddonsPromise)
-    ).filter((ma) => !!ma);
+    ).filter((ma) => !!ma) as InstalledAddon[];
 
     // As matching above is async
     // and some module may be loaded before the matched one,
@@ -148,7 +149,9 @@ export const scanAddons = createAsyncThunk(
       )
       .filter((dir) => dir !== undefined) as number[];
     console.log('Dirs installed but not found', notFoundDirs);
-    thunkAPI.dispatch(removeManyAddons(notFoundDirs));
+    if (notFoundDirs.length > 0) {
+      thunkAPI.dispatch(removeManyAddons(notFoundDirs));
+    }
   }
   // const
 );
@@ -158,11 +161,10 @@ export const installAddon = createAsyncThunk(
   async (id: number, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
     const manager = getAddonManager();
-    const searchResult = selectResult(state).find((sr) => sr.id === id);
+    let searchResult = selectResult(state).find((sr) => sr.id === id);
 
     if (!searchResult) {
-      console.log('no search res');
-      return thunkAPI.rejectWithValue('No searchresult with id ');
+      searchResult = await CurseForgeAPI.getAddonInfo(id);
     }
 
     const installed = await manager.installLatestFile(searchResult);
@@ -188,6 +190,18 @@ export const uninstallAddon = createAsyncThunk(
     } catch (e) {
       return rejectWithValue(e);
     }
+  }
+);
+
+export const getAddonsUpdateInfo = createAsyncThunk(
+  'addons/getUpdateInfo',
+  async (_, { dispatch, getState }) => {
+    const state = getState() as RootState;
+    const installedAddonIds = selectIds(state);
+    const addonUpdateInfo = await CurseForgeAPI.getAddonsInfo(
+      installedAddonIds
+    );
+    return addonUpdateInfo;
   }
 );
 
