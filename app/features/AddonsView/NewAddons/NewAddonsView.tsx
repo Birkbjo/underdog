@@ -23,13 +23,13 @@ import {
 import { Search } from '@material-ui/icons';
 import Header from './Header';
 import NewAddonsList from './NewAddonsList';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 
 export default function NewAddonsView() {
   return (
-    <>
+    <ErrorBoundary>
       <Header />
-
       <NewAddonsList />
-    </>
+    </ErrorBoundary>
   );
 }

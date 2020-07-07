@@ -36,6 +36,9 @@ import {
   ExpandMore,
   ExpandLess,
   Launch,
+  OpenInBrowser,
+  SettingsBackupRestore,
+  DeleteForever,
 } from '@material-ui/icons';
 import { shell } from 'electron';
 import { useAsync } from 'react-async-hook';
@@ -150,12 +153,11 @@ type AddonRowProps = {
 
 function AddonRow({ data, onContextMenu }: AddonRowProps) {
   const classes = useStyles(data);
-  const updateInfo = useSelector((state: RootState) => {
-    console.log('STATE IS', state);
-    return selectById(state, data.id);
-  });
-  const logoUrl = data.addonInfo?.attachments[0]?.thumbnailUrl;
+  const updateInfo = useSelector((state: RootState) =>
+    selectById(state, data.id)
+  );
 
+  const logoUrl = data.addonInfo?.attachments[0]?.thumbnailUrl;
   return (
     <TableRow
       key={data.name}
@@ -202,7 +204,13 @@ function StatusCell(props: StatusCell) {
     }
   }
   const InstallButton = (
-    <Button onClick={() => dispatch(installAddon(addon.id))}>Update</Button>
+    <Button
+      variant="outlined"
+      color="secondary"
+      onClick={() => dispatch(installAddon(addon.id))}
+    >
+      Update
+    </Button>
   );
   return (
     <TableCell>
@@ -224,6 +232,14 @@ function AddonRowContextMenu(props: ContextMenuProps) {
   const getAddonsPath = useSelector(selectAddonPath);
   const dispatch = useDispatch();
 
+  const handleClick = useCallback(
+    (cb) => (e) => {
+      onClose(e, 'click');
+      cb(e);
+    },
+    [onClose]
+  );
+
   return (
     <Menu
       open={!!anchorPosition}
@@ -231,15 +247,30 @@ function AddonRowContextMenu(props: ContextMenuProps) {
       anchorPosition={anchorPosition}
       anchorReference="anchorPosition"
     >
-      <MenuItem onClick={() => console.log('reinstall', addon)}>
-        Reinstall
+      <MenuItem onClick={handleClick(() => console.log('reinstall', addon))}>
+        <ListItemIcon>
+          <SettingsBackupRestore />
+        </ListItemIcon>
+        <ListItemText primary="Reinstall" />
       </MenuItem>
-      <MenuItem>View Addon Website</MenuItem>
+      {addon.addonInfo?.websiteUrl && (
+        <MenuItem
+          onClick={handleClick(() =>
+            shell.openExternal(addon.addonInfo?.websiteUrl)
+          )}
+          // onClick={() => shell.openExternal(addon.addonInfo?.websiteUrl)}
+        >
+          <ListItemIcon>
+            <OpenInBrowser />
+          </ListItemIcon>
+          <ListItemText primary="View Addon Website" />
+        </MenuItem>
+      )}
       {addon.installedDirectiories?.length === 1 ? (
         <MenuItem
-          onClick={() =>
+          onClick={handleClick(() =>
             shell.openPath(getAddonsPath(addon.installedDirectiories[0].name))
-          }
+          )}
         >
           <ListItemIcon>
             <FolderOpen />
@@ -252,6 +283,9 @@ function AddonRowContextMenu(props: ContextMenuProps) {
           onMouseOver={(event) => setAnchorEl(event.currentTarget)}
           onFocus={(event) => setAnchorEl(event.currentTarget)}
         >
+          <ListItemIcon>
+            <FolderOpen />
+          </ListItemIcon>
           <ListItemText primary="Browse Addon Folders" />
           <ArrowRight />
         </MenuItem>
@@ -265,7 +299,13 @@ function AddonRowContextMenu(props: ContextMenuProps) {
         getContentAnchorEl={null}
       />
       <MenuItem onClick={() => dispatch(uninstallAddon(addon.id))}>
-        <Typography color="error">Uninstall Addon</Typography>
+        <ListItemIcon>
+          <DeleteForever />
+        </ListItemIcon>
+        <ListItemText
+          primary="Uninstall"
+          primaryTypographyProps={{ color: 'error' }}
+        />
       </MenuItem>
     </Menu>
   );

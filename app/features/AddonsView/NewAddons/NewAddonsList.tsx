@@ -96,7 +96,13 @@ function AddonRow({ addonInfo }: AddonRowProps) {
       </TableCell>
       <TableCell>{addonInfo.name}</TableCell>
       <TableCell>
-        <Button onClick={() => handleInstall(addonInfo.id)}>Install</Button>
+        <Button
+          color="secondary"
+          variant="outlined"
+          onClick={() => handleInstall(addonInfo.id)}
+        >
+          Install
+        </Button>
       </TableCell>
       <TableCell>N/A</TableCell>
       <TableCell>{latestFile?.displayName || 'No version found'}</TableCell>
