@@ -20,12 +20,12 @@ import { TabPanel, TabContext, TabList } from '@material-ui/lab';
 import MyAddonsView from './MyAddons/MyAddonsView';
 import SelectWoWDir from '../config/SelectWowDir';
 import NewAddonsView from './NewAddons/NewAddonsView';
-import { scanAddons } from './effects';
+import { initAddons } from './effects';
 import { selectPath } from '../config/configSlice';
 
 const useStyles = makeStyles({
   tabPanelContainer: {
-    height: 'calc(100vh - 230px)',
+    height: 'calc(100vh - 215px)',
   },
   tabPanel: {
     height: '100%',
@@ -37,7 +37,7 @@ export default function AddonsView() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(scanAddons());
+    dispatch(initAddons());
   }, [dispatch, path]);
 
   const handleChange = (_, newTab: string) => setTab(newTab);

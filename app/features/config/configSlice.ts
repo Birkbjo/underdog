@@ -1,9 +1,10 @@
-import { createSlice, EntityState } from '@reduxjs/toolkit';
+import { createSlice, EntityState, createSelector } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
 import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
 import createElectronStorage from 'redux-persist-electron-storage';
 import path from 'path';
 import type { RootState } from '../../store';
+import AddonManager from '../AddonsView/AddonManager/AddonManager';
 
 const electronStore = createElectronStorage({
   electronStoreOpts: {
@@ -55,3 +56,10 @@ export const selectAddonRootPath = (state: RootState) =>
 
 export const selectAddonPath = (state: RootState) => (addonDir: string) =>
   path.join(selectAddonRootPath(state), addonDir);
+
+export const selectAddonManager = createSelector(
+  (state: RootState) => selectPath(state),
+  (installationPath) => {
+    return new AddonManager(installationPath);
+  }
+);

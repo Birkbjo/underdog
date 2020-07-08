@@ -4,8 +4,6 @@ import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
 import { setPath, selectPath } from './configSlice';
-import AddonManager from '../AddonsView/AddonManager/AddonManager';
-import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
 
 function getDefaultPath() {
   const os = process.platform;

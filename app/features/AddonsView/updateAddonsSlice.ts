@@ -5,6 +5,9 @@ import {
   createEntityAdapter,
   EntityState,
 } from '@reduxjs/toolkit';
+import autoMergeLevel1 from 'redux-persist/lib/stateReconciler/autoMergeLevel1';
+import createElectronStorage from 'redux-persist-electron-storage';
+import { persistReducer } from 'redux-persist';
 import {
   ScannedAddonData,
   AddonUpdateResult,
@@ -12,10 +15,14 @@ import {
   AddonFile,
 } from './types';
 import { selectById as selectAddonById } from './addonsSlice';
-
 import type { RootState } from '../../store';
 import AddonManager from './AddonManager/AddonManager';
 
+const electronStore = createElectronStorage({
+  electronStoreOpts: {
+    name: 'installedAddons',
+  },
+});
 const updateAddonsAdapter = createEntityAdapter<AddonUpdateResult>({
   selectId: (addon) => addon.id,
   sortComparer: (a, b) => a.name.localeCompare(b.name),
@@ -73,6 +80,17 @@ export const {
   removeManyAddons,
 } = updateAddonsSlice.actions;
 
+const persistedInstalledAddonsReducer = persistReducer<AddonUpdatesState>(
+  {
+    key: 'updates',
+    storage: electronStore,
+    stateReconciler: autoMergeLevel1,
+  },
+  updateAddonsSlice.reducer
+);
+
+// Selectors
+
 export const {
   selectAll,
   selectTotal,
@@ -122,4 +140,5 @@ export const selectHasUpdate = createSelector(
   }
 );
 
-export default updateAddonsSlice.reducer;
+//export default updateAddonsSlice.reducer;
+export default persistedInstalledAddonsReducer;

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import AdmZip, { IZipEntry } from 'adm-zip';
 import {
   ScannedAddonData,
   InstalledAddon,
@@ -11,9 +10,9 @@ import {
   ReleaseType,
   AddonDirectory,
 } from '../types';
-import { store } from '../../../store';
 import { extractZip, computeDirHash } from '../../../utils/utils';
 import { selectPath } from '../../config/configSlice';
+
 class AddonManager {
   installationPath: string;
 
@@ -218,17 +217,3 @@ interface InstallOptions {
 }
 
 export default AddonManager;
-
-let addonManagerFromState: AddonManager;
-export function getWithState(overridePath?: string): AddonManager {
-  console.log('in addonmanagerget');
-  if (!overridePath && addonManagerFromState) {
-    console.log('return stored', addonManagerFromState);
-    return addonManagerFromState;
-  }
-  const state = store.getState();
-  const installationPath = selectPath(state);
-  addonManagerFromState = new AddonManager(overridePath || installationPath);
-
-  return addonManagerFromState;
-}

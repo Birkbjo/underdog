@@ -18,18 +18,19 @@ import {
   removeManyAddons,
 } from './addonsSlice';
 import { selectResult } from './NewAddons/newAddonsSlice';
-import AddonManager, {
-  getWithState as getAddonManager,
-} from './AddonManager/AddonManager';
+
 import type { RootState } from '../../store';
-import { setSearchResult } from './newAddonsSlice';
-import { selectUpdateInfoById } from './updateAddonsSlice';
+import { selectAddonManager } from '../config/configSlice';
+import {
+  selectUpdateInfoById,
+  addAddon as addAddonUpdateResult,
+} from './updateAddonsSlice';
 
 export const scanAddons = createAsyncThunk(
   'addons/scan',
   async (args, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
-    const addonManager = getAddonManager();
+    const addonManager = selectAddonManager(state);
     const installedAddons = selectAddons(state);
 
     const installedDirs = installedAddons.flatMap((a) =>
@@ -55,11 +56,14 @@ export const scanAddons = createAsyncThunk(
         console.log('searched for', sa.title);
         // TODO: check sa.shortName against modules of matches
         let addonMatch: AddonSearchResult | undefined;
+        // Match on the 'main' directory of the folder
         const addonDirectMatch = searchResult.find(
           (sr) => sr.name === sa.title
         );
         addonMatch = addonDirectMatch;
         console.log('searchRes', searchResult);
+
+        // Check if the current scanned dir matched a module of the result
         const moduleMatch = searchResult.find((sr) => {
           const latestFile = AddonManager.getLatestFile(sr);
           return (
@@ -139,8 +143,10 @@ export const scanAddons = createAsyncThunk(
     console.log('MATCHED', matchedAddons);
     console.log('UNMATCHED', unmatched);
     console.log('unatchfiltered', unmatchedFiltered);
-    thunkAPI.dispatch(addManyAddons(matchedAddons));
-    // Remove addons that are installed in Underdog, but not found in folder
+    if (matchedAddons.length > 0) {
+      I.dispatch(addManyAddons(matchedAddons));
+    }
+    // Remove addons that are installed in Underdog, but not during scan
     const notFoundDirs = installedDirs
       .filter((dirName) => !scanResult.find((sr) => sr.shortName === dirName))
       .map(
@@ -163,7 +169,7 @@ export const installLatestAddon = createAsyncThunk(
   'addons/installLatestAddon',
   async (id: number, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
-    const manager = getAddonManager();
+    const manager = selectAddonManager(state);
 
     let searchResult = selectResult(state).find((sr) => sr.id === id);
     if (!searchResult) {
@@ -173,6 +179,7 @@ export const installLatestAddon = createAsyncThunk(
       searchResult = await CurseForgeAPI.getAddonInfo(id);
     }
 
+    thunkAPI.dispatch(addAddonUpdateResult(searchResult));
     const installed = await manager.installLatestFile(searchResult);
     thunkAPI.dispatch(addAddon(installed));
     return installed;
@@ -186,7 +193,7 @@ export const installAddonByFile = createAsyncThunk(
     thunkAPI
   ) => {
     const state = thunkAPI.getState() as RootState;
-    const manager = getAddonManager();
+    const manager = selectAddonManager(state);
     let searchResult = selectResult(state).find((sr) => sr.id === id);
 
     if (!searchResult) {
@@ -195,6 +202,7 @@ export const installAddonByFile = createAsyncThunk(
     if (!searchResult) {
       searchResult = await CurseForgeAPI.getAddonInfo(addonId);
     }
+    thunkAPI.dispatch(addAddonUpdateResult(searchResult));
 
     const installed = await manager.installFile(searchResult, addonFile);
     thunkAPI.dispatch(addAddon(installed));
@@ -207,7 +215,7 @@ export const uninstallAddon = createAsyncThunk(
   async (id: number, { dispatch, getState, rejectWithValue }) => {
     const state = getState() as RootState;
     const addon = selectById(state, id);
-    const addonManager = getAddonManager();
+    const addonManager = selectAddonManager(state);
 
     if (addon === undefined) {
       return rejectWithValue(`Addon with id ${id} not found`);
@@ -259,8 +267,18 @@ export const getAddonFileInfo = createAsyncThunk(
     // const files = await CurseForgeAPI.getFilesInfo(addonId);
     return {
       ...result,
-      addonId: addonId,
+      projectId: addonId,
     };
+  }
+);
+
+export const initAddons = createAsyncThunk(
+  'addons/init',
+  async (_, { dispatch }) => {
+    const scannedAddons = dispatch(scanAddons());
+    const updateAddons = dispatch(getAddonsUpdateInfo());
+
+    return Promise.all([scannedAddons, updateAddons]);
   }
 );
 

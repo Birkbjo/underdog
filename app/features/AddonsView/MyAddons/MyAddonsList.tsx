@@ -29,6 +29,7 @@ import {
   Collapse,
   MenuProps,
   TableCellProps,
+  CircularProgress,
 } from '@material-ui/core';
 import {
   FolderOpen,
@@ -47,7 +48,11 @@ import { selectAddons } from '../addonsSlice';
 import { selectAddonPath, selectAddonRootPath } from '../../config/configSlice';
 import { InstalledAddon, AddonDirectory, AddonSearchResult } from '../types';
 import { uninstallAddon, installLatestAddon } from '../effects';
-import { selectUpdateInfoById, selectHasUpdate } from '../updateAddonsSlice';
+import {
+  selectUpdateInfoById,
+  selectHasUpdate,
+  selectMeta,
+} from '../updateAddonsSlice';
 import { RootState } from '../../../store';
 import AddonManager from '../AddonManager/AddonManager';
 import AddonInfo from './AddonInfo';
