@@ -6,8 +6,6 @@ import { remote } from 'electron';
 import { setPath, selectPath } from './configSlice';
 import AddonManager from '../AddonsView/AddonManager/AddonManager';
 import { setAddons } from '../AddonsView/MyAddons/myAddonsSlice.ts';
-import { getInstalledAddonInfo } from '../AddonsView/effects';
-import { persistor } from '../../store';
 
 function getDefaultPath() {
   const os = process.platform;

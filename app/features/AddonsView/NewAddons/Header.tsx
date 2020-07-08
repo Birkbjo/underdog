@@ -33,9 +33,5 @@ const useStyles = makeStyles((theme) => ({
 export default function Header() {
   const classes = useStyles();
   //const addons = useSelector(selectAddons);
-  return (
-    <Card className={classes.headerbar}>
-      <AddonSearch />
-    </Card>
-  );
+  return <AddonSearch />;
 }

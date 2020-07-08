@@ -5,6 +5,8 @@ import {
   InstalledAddon,
   AddonDirectory,
   AddonSearchResult,
+  AddonUpdateResult,
+  AddonFile,
 } from './types';
 import {
   addAddon,
@@ -21,6 +23,7 @@ import AddonManager, {
 } from './AddonManager/AddonManager';
 import type { RootState } from '../../store';
 import { setSearchResult } from './newAddonsSlice';
+import { selectUpdateInfoById } from './updateAddonsSlice';
 
 export const scanAddons = createAsyncThunk(
   'addons/scan',
@@ -156,18 +159,44 @@ export const scanAddons = createAsyncThunk(
   // const
 );
 
-export const installAddon = createAsyncThunk(
-  'addons/installAddon',
+export const installLatestAddon = createAsyncThunk(
+  'addons/installLatestAddon',
   async (id: number, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
     const manager = getAddonManager();
-    let searchResult = selectResult(state).find((sr) => sr.id === id);
 
+    let searchResult = selectResult(state).find((sr) => sr.id === id);
+    if (!searchResult) {
+      searchResult = selectUpdateInfoById(state, id);
+    }
     if (!searchResult) {
       searchResult = await CurseForgeAPI.getAddonInfo(id);
     }
 
     const installed = await manager.installLatestFile(searchResult);
+    thunkAPI.dispatch(addAddon(installed));
+    return installed;
+  }
+);
+
+export const installAddonByFile = createAsyncThunk(
+  'addons/installAddonByFile',
+  async (
+    { addonId, addonFile }: { addonId: number | string; addonFile: AddonFile },
+    thunkAPI
+  ) => {
+    const state = thunkAPI.getState() as RootState;
+    const manager = getAddonManager();
+    let searchResult = selectResult(state).find((sr) => sr.id === id);
+
+    if (!searchResult) {
+      searchResult = selectUpdateInfoById(state, addonId);
+    }
+    if (!searchResult) {
+      searchResult = await CurseForgeAPI.getAddonInfo(addonId);
+    }
+
+    const installed = await manager.installFile(searchResult, addonFile);
     thunkAPI.dispatch(addAddon(installed));
     return installed;
   }
@@ -194,8 +223,8 @@ export const uninstallAddon = createAsyncThunk(
 );
 
 export const getAddonsUpdateInfo = createAsyncThunk(
-  'addons/getUpdateInfo',
-  async (_, { dispatch, getState }) => {
+  'updates/getUpdateInfo',
+  async (_, { dispatch, getState }): Promise<AddonUpdateResult[]> => {
     const state = getState() as RootState;
     const installedAddonIds = selectIds(state);
     const addonUpdateInfo = await CurseForgeAPI.getAddonsInfo(
@@ -205,30 +234,33 @@ export const getAddonsUpdateInfo = createAsyncThunk(
   }
 );
 
-export const getInstalledAddonInfo = createAsyncThunk(
-  'addons/getInstalledAddonInfo',
-  async (scannedAddon: ScannedAddonData, { dispatch, getState }) => {
-    const searchRes = await CurseForgeAPI.search(scannedAddon.title);
+export const getAddonUpdateInfo = createAsyncThunk(
+  'updates/getUpdateInfoById',
+  async (
+    addonId: number | string,
+    { dispatch, getState }
+  ): Promise<AddonUpdateResult> => {
+    const result = await CurseForgeAPI.getAddonInfo(addonId);
+    //const files = await CurseForgeAPI.getFilesInfo(addonId);
+    return result;
+  }
+);
 
-    const addonMatch = searchRes.find((sr) => sr.name === scannedAddon.title);
-    if (addonMatch) {
-      const addon: InstalledAddon = {
-        scannedAddon,
-        addonInfo: addonMatch,
-        linked: true,
-        installed: true,
-        id: addonMatch.id,
-      };
-      if (scannedAddon.shortName === 'Details') {
-        console.log('INSTALL LATEST');
-        const manager = getAddonManager();
-        console.log('manager is', manager);
-        manager.installLatestFile(addonMatch);
-      }
-      dispatch(addAddon(addon));
-    } else {
-      console.log('NO MATCH!', scannedAddon, searchRes);
-    }
+export const getAddonFileInfo = createAsyncThunk(
+  'updates/getFileInfoById',
+  async ({
+    addonId,
+    fileId,
+  }: {
+    addonId: number | string;
+    fileId: number;
+  }): Promise<AddonFile> => {
+    const result = await CurseForgeAPI.getFileInfo(addonId, fileId);
+    // const files = await CurseForgeAPI.getFilesInfo(addonId);
+    return {
+      ...result,
+      addonId: addonId,
+    };
   }
 );
 

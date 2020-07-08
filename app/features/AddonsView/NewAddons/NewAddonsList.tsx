@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { selectResult } from './newAddonsSlice';
-import { installAddon } from '../effects';
+import { installLatestAddon } from '../effects';
 import { AddonSearchResult } from '../types';
 import AddonManager from '../AddonManager/AddonManager';
 
@@ -68,7 +68,7 @@ function NewAddonsTable({ addons }: AddonsTableProps) {
 }
 
 type AddonRowProps = {
-  data: AddonSearchResult;
+  addonInfo: AddonSearchResult;
 };
 
 function AddonRow({ addonInfo }: AddonRowProps) {
@@ -82,7 +82,7 @@ function AddonRow({ addonInfo }: AddonRowProps) {
   }
 
   const handleInstall = async (id) => {
-    const installedAddon = await dispatch(installAddon(id));
+    const installedAddon = await dispatch(installLatestAddon(id));
   };
   //const latestFile = latestFiles.sort((a, b) => b.fileDate - a.fileDate)[0];
   return (

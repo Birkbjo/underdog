@@ -46,12 +46,16 @@ import { selectAddons as selectMyAddons } from './myAddonsSlice';
 import { selectAddons } from '../addonsSlice';
 import { selectAddonPath, selectAddonRootPath } from '../../config/configSlice';
 import { InstalledAddon, AddonDirectory, AddonSearchResult } from '../types';
-import { uninstallAddon, installAddon } from '../effects';
-import { selectById } from '../updateAddonsSlice';
+import { uninstallAddon, installLatestAddon } from '../effects';
+import { selectUpdateInfoById, selectHasUpdate } from '../updateAddonsSlice';
 import { RootState } from '../../../store';
 import AddonManager from '../AddonManager/AddonManager';
+import AddonInfo from './AddonInfo';
 
 const useStyles = makeStyles({
+  tableContainer: {
+    height: '100%',
+  },
   imageCell: {
     paddingRight: 0,
     width: 48,
@@ -86,6 +90,7 @@ interface AnchorPosition {
 }
 
 function AddonsTable({ addons }: AddonsTableProps) {
+  const classes = useStyles();
   const [anchorPos, setAnchorPos] = useState<AnchorPosition | undefined>(
     undefined
   );
@@ -105,14 +110,17 @@ function AddonsTable({ addons }: AddonsTableProps) {
 
   const handleCloseContextMenu = () => setAnchorPos(undefined);
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      component={Paper}
+      classes={{ root: classes.tableContainer }}
+    >
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell width="1px" />
             <TableCell>AddOn</TableCell>
             <TableCell>Status</TableCell>
-            <TableCell>Addon Version</TableCell>
+            <TableCell>Latest Version</TableCell>
             <TableCell>Game Version</TableCell>
           </TableRow>
         </TableHead>
@@ -154,36 +162,53 @@ type AddonRowProps = {
 function AddonRow({ data, onContextMenu }: AddonRowProps) {
   const classes = useStyles(data);
   const updateInfo = useSelector((state: RootState) =>
-    selectById(state, data.id)
+    selectUpdateInfoById(state, data.id)
   );
+  const hasUpdate = useSelector((state: RootState) =>
+    selectHasUpdate(state, data.id)
+  );
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = (e: MouseEvent) => {
+    e.preventDefault();
+    setOpen(!open);
+  };
 
   const logoUrl = data.addonInfo?.attachments[0]?.thumbnailUrl;
   return (
-    <TableRow
-      key={data.name}
-      onContextMenu={(event) => onContextMenu(event, data)}
-    >
-      <TableCell className={classes.imageCell} size="medium">
-        <Avatar
-          alt="addon-logo"
-          className={classes.imageCell}
-          src={logoUrl}
-          variant="rounded"
-        />
-      </TableCell>
-      <TableCell>
-        <ListItemText
-          primary={data.addonInfo?.name}
-          secondary={data.installedFile?.fileName}
-        />
-      </TableCell>
-      <StatusCell addon={data} updateInfo={updateInfo} />
-      <TableCell>
-        {data.installedFile?.displayName ||
-          'Unable to get addon version. Click update to download latest version.'}
-      </TableCell>
-      <TableCell>{data.installedFile?.gameVersion}</TableCell>
-    </TableRow>
+    <>
+      <TableRow
+        key={data.name}
+        onContextMenu={(event) => onContextMenu(event, data)}
+        onClick={handleOpen}
+        style={{ cursor: 'pointer' }}
+      >
+        <TableCell className={classes.imageCell} size="medium">
+          <Avatar
+            alt="addon-logo"
+            className={classes.imageCell}
+            src={logoUrl}
+            variant="rounded"
+          />
+        </TableCell>
+        <TableCell>
+          <ListItemText
+            primary={data.addonInfo?.name}
+            secondary={data.installedFile?.fileName}
+          />
+        </TableCell>
+        <StatusCell addon={data} updateInfo={updateInfo} />
+        <TableCell>
+          {(updateInfo &&
+            AddonManager.getLatestFile(updateInfo)?.displayName) ||
+            'Unable to get addon version. Please refresh.'}
+        </TableCell>
+        <TableCell>{data.installedFile?.gameVersion}</TableCell>
+        <td>{open ? <ExpandLess /> : <ExpandMore />}</td>
+      </TableRow>
+      <AddonInfo addon={data} open={open} />
+    </>
   );
 }
 
@@ -203,12 +228,14 @@ function StatusCell(props: StatusCell) {
       hasUpdate = latestFile.displayName !== addon.installedFile.displayName;
     }
   }
+  const handleInstall = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch(installLatestAddon(addon.id));
+  };
+
   const InstallButton = (
-    <Button
-      variant="outlined"
-      color="secondary"
-      onClick={() => dispatch(installAddon(addon.id))}
-    >
+    <Button variant="outlined" color="secondary" onClick={handleInstall}>
       Update
     </Button>
   );

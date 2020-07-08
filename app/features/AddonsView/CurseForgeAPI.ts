@@ -1,4 +1,4 @@
-import { AddonSearchResult } from './types';
+import { AddonSearchResult, AddonFile, GameFlavor } from './types';
 import fs from 'fs';
 
 class CurseForgeAPI {
@@ -75,6 +75,24 @@ class CurseForgeAPI {
     const res = await this.request(url, {
       cache: 'default',
     });
+    return res.json();
+  }
+
+  async getFilesInfo(
+    id: string | number,
+    gameFlavor: GameFlavor = 'wow_retail'
+  ): Promise<AddonFile[]> {
+    const url = `${this.baseURL}/${id}/files?gameVersionFlavor=${gameFlavor}`;
+    const res = await this.request(url);
+    return res.json();
+  }
+
+  async getFileInfo(
+    addonId: string | number,
+    fileId: number
+  ): Promise<AddonFile> {
+    const url = `${this.baseURL}/${addonId}/file/${fileId}`;
+    const res = await this.request(url);
     return res.json();
   }
 

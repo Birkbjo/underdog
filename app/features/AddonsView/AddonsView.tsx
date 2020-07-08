@@ -22,6 +22,7 @@ import SelectWoWDir from '../config/SelectWowDir';
 import NewAddonsView from './NewAddons/NewAddonsView';
 import { scanAddons } from './effects';
 import { selectPath } from '../config/configSlice';
+
 const useStyles = makeStyles({
   tabPanelContainer: {
     height: 'calc(100vh - 230px)',

@@ -1,3 +1,4 @@
+import { GameVersionLatestFile } from './types';
 export interface ScannedAddonData {
   name: string;
   shortName: string;
@@ -90,6 +91,14 @@ export interface AddonFile {
   releaseType: ReleaseType;
 }
 
+export interface GameVersionLatestFile {
+  fileType: number;
+  gameVersion: string;
+  gameVersionFlavor: GameFlavor;
+  projectFileId: number;
+  projectFileName: string;
+}
+
 export interface AddonSearchResult {
   attachments: AddonAttachment[];
   authors: AddonAuthor[];
@@ -113,7 +122,11 @@ export interface AddonSearchResult {
   status: number;
   summary: string;
   websiteUrl: string;
-  sortableGameVersion: SortableGameVersion;
+  gameVersionLatestFiles: GameVersionLatestFile[];
+}
+
+export interface AddonUpdateResult extends AddonSearchResult {
+  allFiles?: AddonFile[];
 }
 
 export interface AddonDirectory {
