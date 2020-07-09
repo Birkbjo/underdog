@@ -91,15 +91,17 @@ const persistedInstalledAddonsReducer = persistReducer<AddonUpdatesState>(
 
 // Selectors
 
+export const selectors = updateAddonsAdapter.getSelectors(
+  (state: RootState) => state.addons.updates
+);
+
 export const {
   selectAll,
   selectTotal,
   selectIds,
   selectEntities,
   selectById,
-} = updateAddonsAdapter.getSelectors(
-  (state: RootState) => state.addons.updates
-);
+} = selectors;
 
 export const selectUpdateState = (state: RootState) => state.addons.updates;
 
@@ -136,7 +138,9 @@ export const selectHasUpdate = createSelector(
     if (!latestFile) {
       return undefined;
     }
-    return latestFile.displayName !== installedAddon.installedFile.displayName;
+    return (
+      latestFile?.displayName !== installedAddon?.installedFile?.displayName
+    );
   }
 );
 

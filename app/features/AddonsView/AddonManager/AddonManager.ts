@@ -44,6 +44,7 @@ class AddonManager {
     const tocFileNames = addonFileNames.filter(
       (f) => path.extname(f).toLowerCase() === '.toc'
     );
+    //console.log('toc', tocFileNames)
     // TOC should be same as dirname according to WoW addons spec
     const tocFileName = tocFileNames.find(
       (fName) => path.basename(fName, '.toc') === addonDirName
@@ -70,7 +71,7 @@ class AddonManager {
       },
       addonInfo
     );
-
+      console.log("collected", addonInfo)
     return addonInfo as ScannedAddonData;
   }
 
@@ -80,8 +81,8 @@ class AddonManager {
         withFileTypes: true,
       })
     ).filter((ad) => ad.isDirectory());
-    console.log('Scanning!');
-
+    console.log('Scanning!', addonDirs.length, ' addondirs');
+    
     // loop addon dirs
     const addonsInfo = await Promise.all(
       addonDirs.map(async (ad) => {

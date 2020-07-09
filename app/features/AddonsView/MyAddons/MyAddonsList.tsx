@@ -12,6 +12,7 @@ import {
   Box,
   Paper,
   Card,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -40,6 +41,8 @@ import {
   OpenInBrowser,
   SettingsBackupRestore,
   DeleteForever,
+  Check,
+  SystemUpdateAlt,
 } from '@material-ui/icons';
 import { shell } from 'electron';
 import { useAsync } from 'react-async-hook';
@@ -53,6 +56,7 @@ import {
   selectHasUpdate,
   selectMeta,
 } from '../updateAddonsSlice';
+import { selectSortedAddons } from '../selectors';
 import { RootState } from '../../../store';
 import AddonManager from '../AddonManager/AddonManager';
 import AddonInfo from './AddonInfo';
@@ -61,10 +65,14 @@ const useStyles = makeStyles({
   tableContainer: {
     height: '100%',
   },
+  tableRow: {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
   imageCell: {
     paddingRight: 0,
-    width: 48,
-    height: 48,
+    //  width: 48,
+    // height: 48,
   },
   menuOpenExternalIcon: {
     justifyContent: 'flex-end',
@@ -72,7 +80,7 @@ const useStyles = makeStyles({
   },
 });
 export default function MyAddonsList() {
-  const addons = useSelector(selectAddons);
+  const addons = useSelector(selectSortedAddons);
   return (
     <>
       {addons.length < 1 ? (
@@ -119,7 +127,7 @@ function AddonsTable({ addons }: AddonsTableProps) {
       component={Paper}
       classes={{ root: classes.tableContainer }}
     >
-      <Table aria-label="simple table">
+      <Table size="small" aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell width="1px" />
@@ -240,13 +248,13 @@ function StatusCell(props: StatusCell) {
   };
 
   const InstallButton = (
-    <Button variant="outlined" color="secondary" onClick={handleInstall}>
-      Update
-    </Button>
+    <IconButton edge="start" onClick={handleInstall}>
+      <SystemUpdateAlt color="secondary" />
+    </IconButton>
   );
   return (
     <TableCell>
-      {!addon.linked || hasUpdate ? InstallButton : 'Latest version'}
+      {!addon.linked || hasUpdate ? InstallButton : <Check />}
     </TableCell>
   );
 }

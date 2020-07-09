@@ -18,7 +18,7 @@ import {
   removeManyAddons,
 } from './addonsSlice';
 import { selectResult } from './NewAddons/newAddonsSlice';
-
+import AddonManager from './AddonManager/AddonManager'
 import type { RootState } from '../../store';
 import { selectAddonManager } from '../config/configSlice';
 import {
@@ -29,6 +29,8 @@ import {
 export const scanAddons = createAsyncThunk(
   'addons/scan',
   async (args, thunkAPI) => {
+
+    
     const state = thunkAPI.getState() as RootState;
     const addonManager = selectAddonManager(state);
     const installedAddons = selectAddons(state);
@@ -144,7 +146,7 @@ export const scanAddons = createAsyncThunk(
     console.log('UNMATCHED', unmatched);
     console.log('unatchfiltered', unmatchedFiltered);
     if (matchedAddons.length > 0) {
-      I.dispatch(addManyAddons(matchedAddons));
+      thunkAPI.dispatch(addManyAddons(matchedAddons));
     }
     // Remove addons that are installed in Underdog, but not during scan
     const notFoundDirs = installedDirs
@@ -161,7 +163,7 @@ export const scanAddons = createAsyncThunk(
     if (notFoundDirs.length > 0) {
       thunkAPI.dispatch(removeManyAddons(notFoundDirs));
     }
-  }
+  } 
   // const
 );
 
@@ -235,10 +237,13 @@ export const getAddonsUpdateInfo = createAsyncThunk(
   async (_, { dispatch, getState }): Promise<AddonUpdateResult[]> => {
     const state = getState() as RootState;
     const installedAddonIds = selectIds(state);
-    const addonUpdateInfo = await CurseForgeAPI.getAddonsInfo(
-      installedAddonIds
-    );
-    return addonUpdateInfo;
+    
+    if(installedAddonIds.length > 0 ) {
+      return CurseForgeAPI.getAddonsInfo(
+        installedAddonIds
+      )
+    }
+    return []
   }
 );
 
@@ -275,10 +280,16 @@ export const getAddonFileInfo = createAsyncThunk(
 export const initAddons = createAsyncThunk(
   'addons/init',
   async (_, { dispatch }) => {
-    const scannedAddons = dispatch(scanAddons());
-    const updateAddons = dispatch(getAddonsUpdateInfo());
+    try {
+    const scannedAddons = await dispatch(scanAddons());
+    console.log(scannedAddons)
+    const updateAddons = await dispatch(getAddonsUpdateInfo());
+    } catch(e) {
+      console.log(e)
+    }
 
-    return Promise.all([scannedAddons, updateAddons]);
+    return true
+    return await Promise.all([scannedAddons, updateAddons]);
   }
 );
 

@@ -64,15 +64,17 @@ export const {
   removeManyAddons,
 } = addonsSlice.actions;
 
+export const selectors = installedAddonsAdapter.getSelectors(
+  (state: RootState) => state.addons.installed
+);
+
 export const {
   selectAll,
   selectTotal,
   selectIds,
   selectEntities,
   selectById,
-} = installedAddonsAdapter.getSelectors(
-  (state: RootState) => state.addons.installed
-);
+} = selectors;
 
 export const selectAddons = (state: RootState) => selectAll(state);
 
@@ -86,8 +88,6 @@ const persistedInstalledAddonsReducer = persistReducer<InstalledAddonsState>(
 );
 export default persistedInstalledAddonsReducer;
 
-let current = makeAddonsSlice('_retail_');
-current = addonsSlice;
 // export default combineReducers({
 //   myAddons: myAddonsReducer,
 //   newAddons: newAddonsReducer,
