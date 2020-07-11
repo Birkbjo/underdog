@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Snackbar, CircularProgress } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { remote } from 'electron';
+import fs from 'fs';
+import path from 'path';
 import { setPath, selectPath } from './configSlice';
 
 function getDefaultPath() {
@@ -14,6 +16,20 @@ function getDefaultPath() {
     return 'C:\\Program Files (x86)\\World of Warcraft\\_retail_';
   }
   return '';
+}
+
+function validateSelectedPath(wowDir: string) {
+  const addonFolder = path.join(wowDir, 'Interface', 'Addons');
+
+  console.log('Checking filepath: ' + addonFolder);
+
+  if (fs.existsSync(addonFolder)) {
+    console.log('Path is valid: ' + addonFolder);
+    return true;
+  } else {
+    console.log('Invalid path selected: ' + addonFolder);
+    return false;
+  }
 }
 
 export default function SelectWoWDir() {
@@ -30,7 +46,11 @@ export default function SelectWoWDir() {
         properties: ['openDirectory'],
       })
       .then((res) => {
-        if (!res.canceled && res.filePaths) {
+        if (
+          !res.canceled &&
+          res.filePaths &&
+          validateSelectedPath(res.filePaths[0])
+        ) {
           const filePath = res.filePaths[0];
           dispatch(setPath({ path: filePath }));
           setOpen(false);
